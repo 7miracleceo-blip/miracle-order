@@ -5,169 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>스마트 오더 - 주문하기</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f7f6;
-            color: #333;
-        }
-        header {
-            background-color: #ff6b6b;
-            color: white;
-            text-align: center;
-            padding: 1rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .container {
-            padding: 1rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .menu-item {
-            background: white;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .menu-info h3 {
-            margin: 0 0 0.5rem 0;
-            font-size: 1.2rem;
-        }
-        .menu-info p {
-            margin: 0;
-            color: #ff6b6b;
-            font-weight: bold;
-        }
-        .controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        button {
-            background-color: #ff6b6b;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-        button:active {
-            background-color: #e55a5a;
-        }
-        .cart-summary {
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 2rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .cart-summary h2 {
-            margin-top: 0;
-            border-bottom: 2px solid #f4f7f6;
-            padding-bottom: 0.5rem;
-        }
-        .total {
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: right;
-            margin: 1rem 0;
-            color: #ff6b6b;
-        }
-        .payment-options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 1rem;
-        }
-        .payment-options label {
-            background: #f9f9f9;
-            padding: 10px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-        }
-        .payment-options input[type="radio"] {
-            accent-color: #ff6b6b;
-        }
-        .order-btn {
-            width: 100%;
-            padding: 15px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 8px;
-            background-color: #4ecdc4;
-        }
-        .order-btn:active {
-            background-color: #45b7af;
-        }
-        .table-input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-            font-size: 1rem;
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; color: #333; }
+        header { background-color: #ff6b6b; color: white; text-align: center; padding: 1rem; font-size: 1.5rem; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .container { padding: 1rem; max-width: 600px; margin: 0 auto; }
+        .menu-item { background: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .menu-info h3 { margin: 0 0 0.5rem 0; font-size: 1.2rem; }
+        .menu-info p { margin: 0; color: #ff6b6b; font-weight: bold; }
+        .controls { display: flex; align-items: center; gap: 10px; }
+        button { background-color: #ff6b6b; color: white; border: none; border-radius: 4px; padding: 5px 10px; font-size: 1rem; cursor: pointer; }
+        button:active { background-color: #e55a5a; }
+        .cart-summary { background: white; padding: 1rem; border-radius: 8px; margin-top: 2rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .cart-summary h2 { margin-top: 0; border-bottom: 2px solid #f4f7f6; padding-bottom: 0.5rem; }
+        .total { font-size: 1.5rem; font-weight: bold; text-align: right; margin: 1rem 0; color: #ff6b6b; }
+        .payment-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1rem; }
+        .payment-options label { background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px solid #ddd; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .order-btn { width: 100%; padding: 15px; font-size: 1.2rem; font-weight: bold; border-radius: 8px; background-color: #4ecdc4; border: none; color: white; cursor: pointer; }
+        .order-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        .table-input { width: 100%; padding: 10px; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 1rem; }
     </style>
 </head>
 <body>
 
-<header>
-    스마트 오더
-</header>
+<header>세븐 미라클 스마트 오더</header>
 
 <div class="container">
     <input type="number" id="tableNo" class="table-input" placeholder="테이블 번호를 입력하세요 (예: 3)" required>
-
-    <div id="menu-list">
-        <!-- 메뉴 아이템들이 여기에 동적으로 추가됩니다 -->
-    </div>
+    <div id="menu-list"></div>
 
     <div class="cart-summary">
         <h2>주문 내역</h2>
-        <ul id="cart-items" style="list-style: none; padding: 0; margin: 0 0 1rem 0;">
-            <!-- 장바구니 아이템 -->
-        </ul>
+        <ul id="cart-items" style="list-style: none; padding: 0; margin: 0 0 1rem 0;"></ul>
         <div class="total">총 결제 금액: <span id="total-price">0</span>원</div>
         
         <h3>결제 방식 선택</h3>
         <div class="payment-options">
-            <label>
-                <input type="radio" name="payment" value="간편 송금" checked>
-                간편 송금 (카카오페이/토스)
-            </label>
-            <label>
-                <input type="radio" name="payment" value="계좌 이체">
-                계좌 이체 (사장님 계좌 복사)
-            </label>
-            <label>
-                <input type="radio" name="payment" value="카운터 후불 결제">
-                카운터 후불 결제
-            </label>
+            <label><input type="radio" name="payment" value="간편 송금" checked> 간편 송금 (카카오페이/토스)</label>
+            <label><input type="radio" name="payment" value="계좌 이체"> 계좌 이체 (사장님 계좌 복사)</label>
+            <label><input type="radio" name="payment" value="카운터 후불 결제"> 카운터 후불 결제</label>
         </div>
-
         <button class="order-btn" onclick="submitOrder()">주문하기</button>
     </div>
 </div>
 
 <script>
-    // 구글 앱스 스크립트 웹앱 URL (배포 후 변경 필요)
+    // [중요] 반드시 구글 스크립트 '새 배포' 주소를 여기에 넣으세요!
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzooYN47HsQO7PYjUSqSU17Qh7RrNHg3EB3CU7dJRRdR5IM7UTSUbxUCD3AqadRP7Q3qg/exec';
     
-    // 사장님 계좌 정보
-    const OWNER_ACCOUNT = '국민은행 123456-78-901234 홍길동';
+    const OWNER_ACCOUNT = '국민은행 123456-78-901234 홍길동'; // 실제 계좌로 수정하세요
 
     const menus = [
         { id: 1, name: '아메리카노', price: 3000 },
@@ -181,16 +65,12 @@
     function renderMenu() {
         const menuList = document.getElementById('menu-list');
         menuList.innerHTML = '';
-        
         menus.forEach(menu => {
             const count = cart[menu.id] || 0;
             const item = document.createElement('div');
             item.className = 'menu-item';
             item.innerHTML = `
-                <div class="menu-info">
-                    <h3>${menu.name}</h3>
-                    <p>${menu.price.toLocaleString()}원</p>
-                </div>
+                <div class="menu-info"><h3>${menu.name}</h3><p>${menu.price.toLocaleString()}원</p></div>
                 <div class="controls">
                     <button onclick="updateCart(${menu.id}, -1)">-</button>
                     <span>${count}</span>
@@ -202,130 +82,87 @@
     }
 
     function updateCart(menuId, change) {
-        if (!cart[menuId]) cart[menuId] = 0;
-        cart[menuId] += change;
+        cart[menuId] = (cart[menuId] || 0) + change;
         if (cart[menuId] < 0) cart[menuId] = 0;
-        
         renderMenu();
         updateCartSummary();
     }
 
     function updateCartSummary() {
         const cartItems = document.getElementById('cart-items');
-        const totalPriceEl = document.getElementById('total-price');
-        
-        cartItems.innerHTML = '';
         let total = 0;
-
+        cartItems.innerHTML = '';
         menus.forEach(menu => {
             if (cart[menu.id] > 0) {
-                const li = document.createElement('li');
-                li.style.display = 'flex';
-                li.style.justifyContent = 'space-between';
-                li.style.marginBottom = '5px';
-                
                 const subtotal = menu.price * cart[menu.id];
                 total += subtotal;
-                
+                const li = document.createElement('li');
+                li.style.display = 'flex'; li.style.justifyContent = 'space-between'; li.style.marginBottom = '5px';
                 li.innerHTML = `<span>${menu.name} x ${cart[menu.id]}</span> <span>${subtotal.toLocaleString()}원</span>`;
                 cartItems.appendChild(li);
             }
         });
-
-        totalPriceEl.textContent = total.toLocaleString();
+        document.getElementById('total-price').textContent = total.toLocaleString();
     }
 
     async function submitOrder() {
         const tableNo = document.getElementById('tableNo').value;
-        if (!tableNo) {
-            alert('테이블 번호를 입력해주세요.');
-            return;
-        }
+        if (!tableNo) { alert('테이블 번호를 입력해주세요.'); return; }
 
-        let orderDetails = [];
+        let orderItems = [];
         let totalAmount = 0;
-
         menus.forEach(menu => {
             if (cart[menu.id] > 0) {
-                orderDetails.push(`${menu.name} ${cart[menu.id]}개`);
+                orderItems.push(`${menu.name} ${cart[menu.id]}개`);
                 totalAmount += menu.price * cart[menu.id];
             }
         });
 
-        if (orderDetails.length === 0) {
-            alert('메뉴를 선택해주세요.');
-            return;
-        }
-
+        if (orderItems.length === 0) { alert('메뉴를 선택해주세요.'); return; }
         const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
 
-        // 결제 방식에 따른 추가 액션
-        if (paymentMethod === '간편 송금') {
-            // 카카오페이 송금 링크 예시 (실제로는 사장님 송금 링크 사용)
-            alert(`총 ${totalAmount.toLocaleString()}원 입니다.\n확인을 누르시면 송금 화면으로 이동합니다.`);
-            // window.location.href = 'kakaotalk://kakaopay/money/to/qr?qr_code=YOUR_QR_CODE';
-        } else if (paymentMethod === '계좌 이체') {
-            navigator.clipboard.writeText(OWNER_ACCOUNT).then(() => {
-                alert(`계좌번호(${OWNER_ACCOUNT})가 복사되었습니다.\n은행 앱에서 ${totalAmount.toLocaleString()}원을 입금해주세요.`);
-            }).catch(err => {
-                alert(`계좌번호 복사에 실패했습니다. 직접 입력해주세요: ${OWNER_ACCOUNT}`);
-            });
-        } else {
-            alert('주문이 접수되었습니다. 카운터에서 결제해주세요.');
+        // 결제 방식별 안내
+        if (paymentMethod === '계좌 이체') {
+            await navigator.clipboard.writeText(OWNER_ACCOUNT);
+            alert(`계좌번호가 복사되었습니다: ${OWNER_ACCOUNT}\n${totalAmount.toLocaleString()}원을 입금해 주세요.`);
         }
 
         const orderData = {
             tableNo: tableNo,
-            orderDetails: orderDetails.join(', '),
+            orderDetails: orderItems.join(', '),
             totalAmount: totalAmount,
             paymentMethod: paymentMethod
         };
 
+        const btn = document.querySelector('.order-btn');
+        btn.disabled = true;
+        btn.textContent = '전송 중...';
+
         try {
-            // 버튼 비활성화
-            const btn = document.querySelector('.order-btn');
-            btn.disabled = true;
-            btn.textContent = '주문 전송 중...';
-
-            // SCRIPT_URL이 설정되지 않은 경우를 위한 방어 코드
-            if(SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
-                console.log('전송될 데이터:', orderData);
-                alert('주문이 완료되었습니다! (테스트 모드)');
-                cart = {};
-                renderMenu();
-                updateCartSummary();
-                btn.disabled = false;
-                btn.textContent = '주문하기';
-                return;
-            }
-
-            const response = await fetch(SCRIPT_URL, {
+            // 구글 스크립트 전송 (CORS 무시 위해 no-cors 사용)
+            await fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Google Apps Script POST 요청 시 CORS 우회
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                mode: 'no-cors',
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderData)
             });
 
             alert('주문이 성공적으로 접수되었습니다!');
             cart = {};
+            document.getElementById('tableNo').value = '';
             renderMenu();
             updateCartSummary();
-            
         } catch (error) {
-            alert('주문 전송에 실패했습니다. 카운터에 문의해주세요.');
-            console.error('Error:', error);
+            alert('전송 오류가 발생했습니다. 카운터에 말씀해주세요.');
+            console.error(error);
         } finally {
-            const btn = document.querySelector('.order-btn');
             btn.disabled = false;
             btn.textContent = '주문하기';
         }
     }
 
-    // 초기 렌더링
     renderMenu();
 </script>
-
 </body>
 </html>
