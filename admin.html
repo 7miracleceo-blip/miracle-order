@@ -10,148 +10,122 @@
         header h1 { margin: 0; font-size: 1.5rem; color: #4ecdc4; }
         .status-bar { font-size: 0.9rem; color: #bdc3c7; }
         .container { padding: 2rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
-        .order-card { background-color: #34495e; border-radius: 12px; padding: 1.5rem; box-shadow: 0 6px 12px rgba(0,0,0,0.2); position: relative; transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.1); }
-        .order-card:hover { transform: translateY(-5px); }
-        .bg-red { border-left: 8px solid #e74c3c; } /* 후불 */
-        .bg-yellow { border-left: 8px solid #f1c40f; } /* 계좌이체 */
-        .bg-green { border-left: 8px solid #2ecc71; } /* 송금 */
-        .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; margin-bottom: 1rem; }
-        .table-no { font-size: 1.8rem; font-weight: bold; color: #fff; }
-        .time { font-size: 0.9rem; opacity: 0.7; }
-        .order-details { font-size: 1.2rem; line-height: 1.6; margin-bottom: 1rem; min-height: 60px; color: #ecf0f1; }
-        .order-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); }
-        .total-amount { font-size: 1.4rem; font-weight: bold; color: #4ecdc4; }
-        .payment-method { font-size: 0.85rem; padding: 4px 10px; border-radius: 20px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); }
-        .action-btn { width: 100%; padding: 12px; margin-top: 1.2rem; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; background-color: #4ecdc4; color: #1a252f; transition: 0.2s; }
-        .action-btn:hover { background-color: #45b7af; transform: scale(1.02); }
-        #audio-container { display: none; }
+        .order-card { background-color: #34495e; border-radius: 12px; padding: 1.5rem; box-shadow: 0 6px 12px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); }
+        .bg-red { border-left: 8px solid #e74c3c; } 
+        .bg-yellow { border-left: 8px solid #f1c40f; } 
+        .bg-green { border-left: 8px solid #2ecc71; } 
+        .order-header { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+        .table-no { font-size: 1.8rem; font-weight: bold; }
+        .order-details { font-size: 1.2rem; margin-bottom: 1rem; color: #ecf0f1; }
+        .action-btn { width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; background-color: #4ecdc4; border: none; }
+        
+        /* 소리 활성화 안내창 */
+        #audio-unlock {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+        #audio-unlock button {
+            padding: 20px 40px; font-size: 1.5rem; font-weight: bold;
+            background: #4ecdc4; border: none; border-radius: 50px; cursor: pointer;
+        }
     </style>
 </head>
 <body>
+
+<div id="audio-unlock">
+    <h2 style="color:white; margin-bottom: 20px;">POS 시스템을 시작합니다</h2>
+    <button onclick="unlockAudio()">주문 알림음 활성화</button>
+    <p style="color:#bdc3c7; margin-top:15px;">버튼을 누르면 "띵동" 소리와 함께 시작됩니다.</p>
+</div>
 
 <header>
     <h1>SEVEN MIRACLE POS</h1>
     <div class="status-bar">
         업데이트: <span id="last-update">-</span> | 
-        <button onclick="fetchOrders()" style="padding:5px 12px; cursor:pointer; border-radius:4px; border:none; background:#4ecdc4;">새로고침</button>
+        <button onclick="fetchOrders()" style="padding:5px 12px; cursor:pointer; background:#4ecdc4; border:none; border-radius:4px;">새로고침</button>
     </div>
 </header>
 
-<div class="container" id="orders-container">
-    <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #bdc3c7;">
-        데이터를 연결하고 있습니다... (화면을 클릭해 주세요)
-    </div>
-</div>
+<div class="container" id="orders-container"></div>
 
-<div id="audio-container">
+<div id="audio-container" style="display:none;">
     <audio id="sound-prepaid" src="https://t1.daumcdn.net/kakaopay/tesla/20210105/sounds/pe_talk.mp3" preload="auto"></audio>
     <audio id="sound-postpaid" src="https://t1.daumcdn.net/kakaopay/tesla/20210105/sounds/pe_success.mp3" preload="auto"></audio>
 </div>
-    
+
 <script>
-    // [중요] 대표님의 최신 구글 앱스 스크립트 주소를 여기에 넣어주세요!
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5Ui0FiUhigHzRkXyAartYj7_YKmlDlAs_hbES2gwSGesRsy9pMm-ms50RC8ZY2gqX/exec';
-    
     let lastOrderCount = 0;
     let isFirstLoad = true;
 
+    // 소리 권한 풀기 및 첫 테스트
+    function unlockAudio() {
+        const s1 = document.getElementById('sound-prepaid');
+        const s2 = document.getElementById('sound-postpaid');
+        s1.play().then(() => {
+            s1.pause(); s1.currentTime = 0;
+            document.getElementById('audio-unlock').style.display = 'none';
+            fetchOrders();
+            setInterval(fetchOrders, 10000);
+        }).catch(err => alert("소리 권한 오류: 사이트 설정에서 소리를 허용해 주세요."));
+    }
+
     async function fetchOrders() {
         try {
-            const response = await fetch(SCRIPT_URL);
+            const response = await fetch(SCRIPT_URL + '?t=' + new Date().getTime());
             const data = await response.json();
-            
-            if (!data || data.length === 0) {
-                document.getElementById('orders-container').innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #bdc3c7;">현재 접수된 주문이 없습니다.</div>';
-                return;
-            }
+            if (!data || data.length === 0) return;
 
-            const activeOrders = data.filter(order => {
-                return Object.values(order).some(val => String(val).trim() === "대기중");
-            });
+            const activeOrders = data.filter(order => Object.values(order).some(val => String(val).trim() === "대기중"));
             
             if (!isFirstLoad && activeOrders.length > lastOrderCount) {
                 const latestOrder = activeOrders[activeOrders.length - 1];
-                playSound(latestOrder.paymentMethod);
+                const sound = (latestOrder.paymentMethod && latestOrder.paymentMethod.includes('후불')) 
+                              ? document.getElementById('sound-postpaid') 
+                              : document.getElementById('sound-prepaid');
+                sound.play().catch(e => console.log("재생 차단됨"));
             }
             
             lastOrderCount = activeOrders.length;
             isFirstLoad = false;
             renderOrders(activeOrders);
             document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
-            
-        } catch (error) {
-            console.error('오류:', error);
-            document.getElementById('orders-container').innerHTML = `<div style="color:#e74c3c; text-align:center; padding:20px;">연결 오류: ${error.message}<br>구글 주소를 확인하고 화면을 클릭해 주세요.</div>`;
-        }
-    }
-
-    function playSound(method) {
-        try {
-            const sound = (method && method.includes('후불')) ? document.getElementById('sound-postpaid') : document.getElementById('sound-prepaid');
-            sound.play();
-        } catch (e) { console.log("소리 재생 실패"); }
+        } catch (e) { console.error(e); }
     }
 
     function renderOrders(orders) {
         const container = document.getElementById('orders-container');
         container.innerHTML = '';
-        
-        if (orders.length === 0) {
-            container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #bdc3c7;">현재 처리할 주문이 없습니다.</div>';
-            return;
-        }
-        
         [...orders].reverse().forEach(order => {
             const card = document.createElement('div');
             card.className = 'order-card';
-            
             const method = order.paymentMethod || "";
             if (method.includes('후불')) card.classList.add('bg-red');
             else if (method.includes('계좌')) card.classList.add('bg-yellow');
             else card.classList.add('bg-green');
             
-            const timeStr = order.timestamp ? new Date(order.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "-";
-            
             card.innerHTML = `
                 <div class="order-header">
                     <span class="table-no">TABLE ${order.tableNo || "?"}</span>
-                    <span class="time">${timeStr}</span>
+                    <span class="time">${order.timestamp ? new Date(order.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "-"}</span>
                 </div>
                 <div class="order-details">${(order.orderDetails || "").replace(/, /g, '<br>')}</div>
-                <div class="order-footer">
-                    <span class="total-amount">${Number(order.totalAmount || 0).toLocaleString()}원</span>
-                    <span class="payment-method">${method}</span>
+                <div class="order-footer" style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:1.4rem; font-weight:bold; color:#4ecdc4;">${Number(order.totalAmount || 0).toLocaleString()}원</span>
+                    <span style="font-size:0.8rem; background:rgba(0,0,0,0.3); padding:3px 8px; border-radius:10px;">${method}</span>
                 </div>
-                <button class="action-btn" onclick="completeOrder(${order.id}, this)">주문 완료 처리</button>
+                <button class="action-btn" style="margin-top:15px;" onclick="completeOrder(${order.id}, this)">주문 완료</button>
             `;
             container.appendChild(card);
         });
     }
 
-    function completeOrder(orderId, btnElement) {
-        if(confirm('주문을 완료하시겠습니까?')) {
-            const card = btnElement.closest('.order-card');
-            card.style.opacity = '0';
-            card.style.transform = 'scale(0.9)';
-            setTimeout(() => {
-                card.remove();
-                if(document.querySelectorAll('.order-card').length === 0) {
-                    document.getElementById('orders-container').innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #bdc3c7;">모든 주문을 처리했습니다!</div>';
-                }
-            }, 300);
+    function completeOrder(orderId, btn) {
+        if(confirm('완료 처리하시겠습니까?')) {
+            btn.closest('.order-card').remove();
         }
     }
-
-    setInterval(fetchOrders, 10000);
-
-    window.onload = () => {
-        document.body.addEventListener('click', function init() {
-            document.getElementById('sound-prepaid').load();
-            document.getElementById('sound-postpaid').load();
-            fetchOrders();
-            document.body.removeEventListener('click', init);
-        }, { once: true });
-    };
 </script>
 </body>
 </html>
