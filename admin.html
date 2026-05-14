@@ -2,36 +2,31 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>세븐 미라클 POS - 정밀 시간 모드</title>
+    <title>세븐 미라클 POS - 정밀 동기화</title>
     <style>
         body { background: #121212; color: white; font-family: 'Pretendard', sans-serif; margin: 0; padding: 20px; }
-        #setup { text-align: center; padding-top: 150px; }
-        #start-btn { padding: 30px 60px; font-size: 24px; cursor: pointer; background: #00d1b2; border: none; border-radius: 15px; color: white; font-weight: bold; }
-        header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 2px solid #333; margin-bottom: 20px; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 2px solid #333; margin-bottom: 20px; }
         #live-clock { font-size: 32px; font-weight: bold; color: #00d1b2; }
-        #orders { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        #orders { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
         .order-card { background: #252525; border-radius: 15px; padding: 20px; border-top: 10px solid #00d1b2; position: relative; }
         .order-card.unpaid { border-top: 10px solid #ff4757; background: #2d1f1f; }
-        .time-badge { position: absolute; top: 15px; right: 20px; font-size: 16px; font-weight: bold; color: #ffdd57; } /* 시간 강조 */
-        .order-details { margin: 25px 0; font-size: 18px; min-height: 60px; line-height: 1.5; }
-        .price { font-size: 24px; font-weight: bold; color: #00d1b2; }
+        .time-badge { position: absolute; top: 15px; right: 20px; font-size: 18px; font-weight: bold; color: #ffdd57; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 5px; }
+        .price { font-size: 26px; font-weight: bold; color: #00d1b2; margin-top: 15px; }
         .unpaid .price { color: #ff4757; }
+        #setup { text-align: center; margin-top: 150px; }
+        #start-btn { padding: 30px 60px; font-size: 24px; background: #00d1b2; color: white; border: none; border-radius: 15px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="setup">
         <h1 style="color:#00d1b2;">SEVEN MIRACLE</h1>
-        <p>정밀 시간 동기화 모드를 시작합니다.</p><br>
         <button id="start-btn" onclick="activateSystem()">시스템 시작</button>
     </div>
 
     <div id="main-ui" style="display:none;">
         <header>
-            <div>
-                <h1 style="margin:0;">주문 현황판</h1>
-                <p id="last-update" style="margin:5px 0; color:#666;">데이터 연결 중...</p>
-            </div>
+            <h1>주문 현황판</h1>
             <div id="live-clock">00:00:00</div>
         </header>
         <div id="orders"></div>
@@ -50,17 +45,15 @@
             document.getElementById('live-clock').textContent = new Date().toLocaleTimeString('ko-KR', { hour12: false });
         }, 1000);
         checkOrders();
-        setInterval(checkOrders, 5000); 
+        setInterval(checkOrders, 5000);
     }
 
-    function playTone(freq, dur) {
-        if (!audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.frequency.value = freq;
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
-        osc.start(); osc.stop(audioCtx.currentTime + dur);
+    function playTone(f, d) {
+        if(!audioCtx) return;
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        o.frequency.value = f; g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+        o.start(); o.stop(audioCtx.currentTime + d);
     }
 
     async function checkOrders() {
@@ -68,7 +61,6 @@
             const res = await fetch(SCRIPT_URL + '?t=' + new Date().getTime());
             const data = await res.json();
             const activeOrders = data.filter(o => String(o.status).includes("대기중"));
-
             if (activeOrders.length > lastCount) {
                 const latest = activeOrders[activeOrders.length - 1];
                 if (String(latest.payStatus).includes("완료")) {
@@ -79,51 +71,37 @@
             }
             lastCount = activeOrders.length;
             render(activeOrders);
-            document.getElementById('last-update').textContent = "마지막 업데이트: " + new Date().toLocaleTimeString();
-        } catch (e) { console.log("데이터 수신 오류"); }
+        } catch (e) { console.log("Error"); }
     }
 
-function render(orders) {
-    const div = document.getElementById('orders');
-    div.innerHTML = orders.map(o => {
-        const isUnpaid = !String(o.payStatus).includes("완료");
-        
-        // ★★★ 어떤 형식이든 9시간 더해서 한국 시간으로 만드는 마법 ★★★
-        let displayTime = "시간 확인중";
-        try {
-            const raw = String(o.timestamp); // "2026-05-14T19:36:38.000Z"
+    function render(orders) {
+        const div = document.getElementById('orders');
+        div.innerHTML = orders.map(o => {
+            const isUnpaid = !String(o.payStatus).includes("완료");
             
-            // 숫자만 싹 다 뽑아냅니다: [2026, 05, 14, 19, 36, 38]
-            const nums = raw.match(/\d+/g); 
+            // ★ 어떤 데이터가 와도 숫자만 뽑아 한국 시간으로 강제 변환 ★
+            let displayTime = "확인중";
+            const raw = String(o.timestamp);
+            const n = raw.match(/\d+/g); 
             
-            if (nums && nums.length >= 5) {
-                let hh = parseInt(nums[3]); // 19
-                let mm = nums[4];            // 36
-                let ss = nums[5] || "00";    // 38
-                
-                // 무조건 9시간 더하기 (24시 넘어가면 다음날 0시부터)
-                hh = (hh + 9) % 24;
-                const hhStr = hh < 10 ? '0' + hh : hh;
-                
-                displayTime = `${hhStr}:${mm}:${ss}`; // 결과: 04:36:38
+            if (n && n.length >= 5) {
+                let hh = (parseInt(n[3]) + 9) % 24; // 19 + 9 = 28 -> 4시
+                displayTime = `${hh < 10 ? '0' + hh : hh}:${n[4]}:${n[5] || '00'}`;
             }
-        } catch (e) {
-            displayTime = "시간 오류";
-        }
 
-        return `
-            <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
-                <div class="time-badge">${displayTime}</div>
-                <h3 style="margin:0;">테이블 ${o.tableNo}</h3>
-                <div class="order-details">${o.orderDetails}</div>
-                <div class="price">${o.totalAmount.toLocaleString()}원</div>
-                <div style="margin-top:10px; font-weight:bold; color:${isUnpaid ? '#ff4757' : '#00d1b2'}">
-                    ${isUnpaid ? '⚠️ 현장결제 필요' : '✅ 결제완료'}
+            return `
+                <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
+                    <div class="time-badge">${displayTime}</div>
+                    <h3 style="margin:0;">테이블 ${o.tableNo}</h3>
+                    <p style="margin:20px 0; font-size:18px;">${o.orderDetails}</p>
+                    <div class="price">${o.totalAmount.toLocaleString()}원</div>
+                    <div style="font-weight:bold; color:${isUnpaid ? '#ff4757' : '#00d1b2'}">
+                        ${isUnpaid ? '⚠️ 현장결제' : '✅ 결제완료'}
+                    </div>
                 </div>
-            </div>
-        `;
-    }).join('');
-}
+            `;
+        }).join('');
+    }
 </script>
 </body>
 </html>
