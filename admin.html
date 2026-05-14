@@ -83,30 +83,32 @@
         } catch (e) { console.log("데이터 수신 오류"); }
     }
 
-  function render(orders) {
+ function render(orders) {
     const div = document.getElementById('orders');
     div.innerHTML = orders.map(o => {
         const isUnpaid = !String(o.payStatus).includes("완료");
         
-        // ★ 무조건 한국 시간으로 만드는 필살기 ★
+        // ★★★ 글자 강제 분해 및 9시간 더하기 (필살기) ★★★
         let displayTime = "시간 확인중";
         try {
-            const raw = String(o.timestamp);
-            // 날짜와 시간 숫자를 싹 다 뽑아냅니다
-            const matches = raw.match(/\d+/g); // [2026, 05, 14, 19, 27, 05]
+            const raw = String(o.timestamp); // "2026-05-14T19:30:38.000"
             
-            if (matches && matches.length >= 5) {
-                let hour = parseInt(matches[3]); // 19 (서버 시간)
-                let min = matches[4];            // 27
-                let sec = matches[5] || "00";    // 05
+            // 1. T 뒤에 있는 "19:30:38" 부분만 잘라냅니다.
+            if (raw.includes('T')) {
+                const fullTime = raw.split('T')[1]; // "19:30:38.000"
+                const timeParts = fullTime.split(':'); // ["19", "30", "38.000"]
                 
-                // 한국 시간으로 강제 9시간 추가
+                let hour = parseInt(timeParts[0]); // 19
+                let min = timeParts[1];            // 30
+                let sec = timeParts[2].split('.')[0]; // 38
+                
+                // 2. 무조건 한국 시간 9시간을 더합니다. (24시가 넘으면 0시부터 다시 시작)
                 hour = (hour + 9) % 24;
                 const hStr = hour < 10 ? '0' + hour : hour;
                 
-                displayTime = `${hStr}:${min}:${sec}`; // 결과: 04:27:05
+                displayTime = `${hStr}:${min}:${sec}`; // "04:30:38" 완성
             } else {
-                displayTime = raw; // 정 안되면 원본이라도 표시
+                displayTime = raw; // T가 없으면 원본이라도 표시
             }
         } catch (e) {
             displayTime = "시간 오류";
