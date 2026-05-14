@@ -4,69 +4,83 @@
     <meta charset="UTF-8">
     <title>세븐 미라클 POS</title>
     <style>
-        body { background: #2c3e50; color: white; text-align: center; font-family: sans-serif; padding-top: 50px; }
-        .order-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; padding: 20px; }
-        .card { background: #34495e; padding: 20px; border-radius: 10px; border-left: 10px solid #4ecdc4; text-align: left; }
-        #start-btn { padding: 20px 40px; font-size: 20px; cursor: pointer; background: #4ecdc4; border: none; border-radius: 10px; font-weight: bold; }
+        body { background: #1a1a1a; color: white; text-align: center; font-family: sans-serif; padding-top: 100px; }
+        #start-btn { padding: 30px 60px; font-size: 24px; cursor: pointer; background: #00d1b2; border: none; border-radius: 15px; color: white; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        #start-btn:active { transform: scale(0.98); }
+        .order-card { background: #333; margin: 10px; padding: 20px; border-radius: 10px; border-left: 8px solid #00d1b2; text-align: left; }
     </style>
 </head>
 <body>
 
     <div id="setup">
-        <h1>🔔 소리 알림 시스템</h1>
-        <p>아래 버튼을 누르면 POS가 시작됩니다.</p>
-        <button id="start-btn" onclick="startPos()">시스템 시작하기</button>
+        <h1>🔔 주문 알림 시스템</h1>
+        <p>매장 스피커 볼륨을 확인해 주세요.</p>
+        <br>
+        <button id="start-btn" onclick="activateSystem()">시스템 시작 및 소리 활성화</button>
     </div>
 
     <div id="main-ui" style="display:none;">
-        <h1>SEVEN MIRACLE POS</h1>
-        <p>상태: <span id="sync-status">연결됨</span> | 마지막 확인: <span id="time">-</span></p>
-        <div class="order-container" id="orders"></div>
+        <h1 style="color: #00d1b2;">SEVEN MIRACLE POS</h1>
+        <p id="status">연결됨 | 마지막 업데이트: <span id="time">-</span></p>
+        <div id="orders"></div>
     </div>
-
-    <audio id="alarm" src="https://t1.daumcdn.net/kakaopay/tesla/20210105/sounds/pe_talk.mp3" preload="auto"></audio>
 
 <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5Ui0FiUhigHzRkXyAartYj7_YKmlDlAs_hbES2gwSGesRsy9pMm-ms50RC8ZY2gqX/exec';
-    let count = 0;
+    let lastCount = 0;
+    let audioCtx = null;
 
-    function startPos() {
-        // 버튼 누르는 즉시 소리 한 번 강제 재생
-        const sound = document.getElementById('alarm');
-        sound.play().then(() => {
-            sound.pause();
-            document.getElementById('setup').style.display = 'none';
-            document.getElementById('main-ui').style.display = 'block';
-            fetchData();
-            setInterval(fetchData, 10000); // 10초마다 확인
-        }).catch(e => {
-            alert("브라우저 상단 [자물쇠] -> [소리 허용]을 다시 확인해주세요!");
-        });
+    // 브라우저 소리 엔진 강제 깨우기 (이게 핵심입니다!)
+    function activateSystem() {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // 삐- 소리 한 번 내서 통로가 열렸는지 확인
+        playBeep(880, 0.2); 
+
+        document.getElementById('setup').style.display = 'none';
+        document.getElementById('main-ui').style.display = 'block';
+        
+        checkOrders();
+        setInterval(checkOrders, 10000); // 10초마다 새 주문 확인
     }
 
-    async function fetchData() {
+    // 전자음을 직접 만드는 함수 (파일 주소 필요 없음)
+    function playBeep(freq, duration) {
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = freq;
+        gain.gain.value = 0.5;
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+
+    async function checkOrders() {
         try {
             const res = await fetch(SCRIPT_URL + '?t=' + new Date().getTime());
             const data = await res.json();
-            const active = data.filter(o => String(o.status).includes("대기중"));
+            const activeOrders = data.filter(o => String(o.status).includes("대기중"));
 
-            if (active.length > count) {
-                document.getElementById('alarm').play(); // 새 주문 시 소리 재생
+            if (activeOrders.length > lastCount) {
+                // 새 주문이 오면 삐- 삐- 두 번 울림
+                playBeep(880, 0.3);
+                setTimeout(() => playBeep(880, 0.3), 500);
             }
-            count = active.length;
-            render(active);
+            lastCount = activeOrders.length;
+            render(activeOrders);
             document.getElementById('time').textContent = new Date().toLocaleTimeString();
-        } catch (e) { console.log(e); }
+        } catch (e) { console.log("데이터 확인 실패"); }
     }
 
     function render(orders) {
         const div = document.getElementById('orders');
         div.innerHTML = orders.map(o => `
-            <div class="card">
-                <h3>TABLE ${o.tableNo}</h3>
+            <div class="order-card">
+                <h3>테이블 ${o.tableNo}</h3>
                 <p>${o.orderDetails}</p>
-                <p><strong>${o.totalAmount.toLocaleString()}원</strong></p>
-                <button onclick="this.parentElement.remove()" style="width:100%; padding:10px;">완료</button>
+                <p><strong>결제금액: ${o.totalAmount.toLocaleString()}원</strong></p>
             </div>
         `).join('');
     }
