@@ -117,21 +117,27 @@ HTML
         } catch (e) { console.log("연결 실패"); }
     }
 
-   function render(orders) {
+  function render(orders) {
     const div = document.getElementById('orders');
     div.innerHTML = orders.map(o => {
         const isUnpaid = !String(o.payStatus).includes("완료");
         
-        // ★ 한국 시간 강제 계산 (9시간 더하기) ★
-        const date = new Date(o.timestamp);
-        // 서버 시간이 UTC(영국) 기준이므로 한국 시간(+9)으로 강제 변환
-        const korTime = new Date(date.getTime() + (9 * 60 * 60 * 1000));
-
-        const timeString = korTime.toLocaleTimeString('ko-KR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false 
-        });
+        // ★ 느낌표 방지용 안전한 시간 추출 ★
+        let timeString = "시간 미정";
+        try {
+            if (o.timestamp && o.timestamp.includes('T')) {
+                // T와 : 사이의 '시'와 '분'만 글자 그대로 추출
+                let timePart = o.timestamp.split('T')[1]; // 19:15:08...
+                let hour = parseInt(timePart.split(':')[0]);
+                let minute = timePart.split(':')[1];
+                
+                // 한국 시간으로 9시간 더하기
+                hour = (hour + 9) % 24; 
+                timeString = (hour < 10 ? '0' + hour : hour) + ":" + minute;
+            }
+        } catch (e) {
+            timeString = "시간 오류";
+        }
 
         return `
             <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
