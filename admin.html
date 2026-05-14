@@ -75,34 +75,40 @@
         } catch (e) { console.log("Error"); }
     }
 
-  function render(orders) {
+ function render(orders) {
     const div = document.getElementById('orders');
     div.innerHTML = orders.map(o => {
         const isUnpaid = !String(o.payStatus).includes("완료");
         
-        let displayDateTime = "확인중";
+        let displayDateTime = "날짜 확인중";
         try {
             const raw = String(o.timestamp);
             const n = raw.match(/\d+/g); 
             
             if (n && n.length >= 5) {
-                // 1. 서버 날짜와 시간으로 '날짜 객체'를 만듭니다.
-                // 월은 0부터 시작하므로 n[1]-1을 해줍니다.
-                let dt = new Date(n[0], n[1]-1, n[2], n[3], n[4], n[5] || 0);
+                let month = parseInt(n[1]);
+                let day = parseInt(n[2]);
+                let hour = parseInt(n[3]);
+                let min = n[4];
                 
-                // 2. 한국 시간 보정 (9시간 더하기)
-                // 이 과정에서 24시가 넘으면 자동으로 다음날(15일)로 바뀝니다!
-                dt.setHours(dt.getHours() + 9);
+                // 1. 한국 시간 보정 (9시간 더하기)
+                hour = hour + 9;
                 
-                let mm = String(dt.getMonth() + 1).padStart(2, '0');
-                let dd = String(dt.getDate()).padStart(2, '0');
-                let hh = String(dt.getHours()).padStart(2, '0');
-                let min = String(dt.getMinutes()).padStart(2, '0');
+                // 2. 만약 24시가 넘어가면? 다음날로 계산!
+                if (hour >= 24) {
+                    hour = hour - 24; // 시간에서 24 빼기
+                    day = day + 1;    // 날짜에 1 더하기
+                }
                 
-                displayDateTime = `${mm}/${dd} ${hh}:${min}`;
+                // 한 자릿수 숫자들 앞에 0 붙여주기
+                const mmStr = month < 10 ? '0' + month : month;
+                const ddStr = day < 10 ? '0' + day : day;
+                const hhStr = hour < 10 ? '0' + hour : hour;
+                
+                displayDateTime = `${mmStr}/${ddStr} ${hhStr}:${min}`;
             }
         } catch (e) {
-            displayDateTime = "05/15 시간확인"; 
+            displayDateTime = "05/15 시간오류"; 
         }
 
         return `
