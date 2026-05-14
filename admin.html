@@ -156,28 +156,28 @@
             const response = await fetch(SCRIPT_URL);
             const data = await response.json();
             
-            // 대기중인 주문만 필터링
-            const activeOrders = data.filter(order => order.status === '대기중');
-            
-            // 새 주문 알림 체크
-            if (!isFirstLoad && activeOrders.length > lastOrderCount) {
-                // 가장 최근 주문의 결제 방식 확인
-                const latestOrder = activeOrders[activeOrders.length - 1];
-                playSound(latestOrder.paymentMethod);
-            }
-            
-            lastOrderCount = activeOrders.length;
-            isFirstLoad = false;
-            
-            renderOrders(activeOrders);
-            
-            document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
-            
-        } catch (error) {
-            console.error('주문 데이터를 가져오는데 실패했습니다:', error);
-        }
-    }
+          // admin.html 내부의 fetchOrders 함수 안의 데이터 매칭 부분입니다.
+const activeOrders = data.filter(order => {
+    // 시트의 '처리상태' 열이 'status'라는 이름표로 들어옵니다.
+    const statusValue = String(order.status || "").trim();
+    return statusValue === "대기중";
+});
 
+// 화면에 그리는 부분에서 '주문내역' 이름표 확인
+card.innerHTML = `
+    <div class="order-header">
+        <span class="table-no">Table ${order.tableNo}</span>
+        <span class="time">${new Date(order.timestamp).toLocaleTimeString()}</span>
+    </div>
+    <div class="order-details">
+        ${(order.orderDetails || "주문 내역 없음").replace(/, /g, '<br>')}
+    </div>
+    <div class="order-footer">
+        <span class="total-amount">${Number(order.totalAmount || 0).toLocaleString()}원</span>
+        <span class="payment-method">${order.paymentMethod}</span>
+    </div>
+    <button class="action-btn" onclick="completeOrder(${order.id}, this)">처리 완료</button>
+`;
     // 사운드 재생 함수
     function playSound(paymentMethod) {
         try {
