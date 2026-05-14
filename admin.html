@@ -75,40 +75,51 @@
         } catch (e) { console.log("Error"); }
     }
 
-    function render(orders) {
-        const div = document.getElementById('orders');
-        div.innerHTML = orders.map(o => {
-            const isUnpaid = !String(o.payStatus).includes("완료");
-            
-            // ★ 날짜와 시간을 강제로 조립하는 로직 ★
-            let displayDateTime = "날짜 확인중";
+   function render(orders) {
+    const div = document.getElementById('orders');
+    div.innerHTML = orders.map(o => {
+        const isUnpaid = !String(o.payStatus).includes("완료");
+        
+        let displayDateTime = "";
+        try {
             const raw = String(o.timestamp);
             const n = raw.match(/\d+/g); 
             
-            if (n && n.length >= 5) {
-                let month = n[1]; // 월
-                let day = n[2];   // 일
-                let hh = (parseInt(n[3]) + 9) % 24; // 한국 시간 보정
-                let mm = n[4];    // 분
-                
+            // 1. 데이터에 날짜 숫자가 충분히 들어있는 경우 (정상)
+            if (n && n.length >= 3) {
+                let month = n[1];
+                let day = n[2];
+                let hh = (parseInt(n[3] || 0) + 9) % 24;
+                let mm = n[4] || "00";
                 const hhStr = hh < 10 ? '0' + hh : hh;
-                // "05/15 05:01" 형식으로 조립
-                displayDateTime = month + "/" + day + " " + hhStr + ":" + mm;
+                displayDateTime = `${month}/${day} ${hhStr}:${mm}`;
+            } 
+            // 2. 날짜 숫자가 부족하면 PC의 현재 날짜를 강제로 가져다 씀 (필살기)
+            else {
+                const now = new Date();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const hh = String(now.getHours()).padStart(2, '0');
+                const mm = String(now.getMinutes()).padStart(2, '0');
+                displayDateTime = `${month}/${day} ${hh}:${mm}`;
             }
+        } catch (e) {
+            displayDateTime = "05/15 시간확인"; // 최후의 수단
+        }
 
-            return `
-                <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
-                    <div class="time-badge">${displayDateTime}</div>
-                    <h3 style="margin:0;">테이블 ${o.tableNo}</h3>
-                    <p style="margin:20px 0; font-size:18px;">${o.orderDetails}</p>
-                    <div class="price">${o.totalAmount.toLocaleString()}원</div>
-                    <div style="font-weight:bold; color:${isUnpaid ? '#ff4757' : '#00d1b2'}">
-                        ${isUnpaid ? '⚠️ 현장결제' : '✅ 결제완료'}
-                    </div>
+        return `
+            <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
+                <div class="time-badge">${displayDateTime}</div>
+                <h3 style="margin:0;">테이블 ${o.tableNo}</h3>
+                <p style="margin:20px 0; font-size:18px;">${o.orderDetails}</p>
+                <div class="price">${o.totalAmount.toLocaleString()}원</div>
+                <div style="font-weight:bold; color:${isUnpaid ? '#ff4757' : '#00d1b2'}">
+                    ${isUnpaid ? '⚠️ 현장결제' : '✅ 결제완료'}
                 </div>
-            `;
-        }).join('');
-    }
+            </div>
+        `;
+    }).join('');
+}
 </script>
 </body>
 </html>
