@@ -74,34 +74,45 @@
         } catch (e) { console.log("Error"); }
     }
 
-    function render(orders) {
-        const div = document.getElementById('orders');
-        div.innerHTML = orders.map(o => {
-            const isUnpaid = !String(o.payStatus).includes("완료");
-            
-            // ★ 어떤 데이터가 와도 숫자만 뽑아 한국 시간으로 강제 변환 ★
-            let displayTime = "확인중";
+   function render(orders) {
+    const div = document.getElementById('orders');
+    div.innerHTML = orders.map(o => {
+        const isUnpaid = !String(o.payStatus).includes("완료");
+        
+        // ★ 날짜와 시간을 모두 추출하는 마법 ★
+        let displayDateTime = "확인중";
+        try {
             const raw = String(o.timestamp);
-            const n = raw.match(/\d+/g); 
+            const n = raw.match(/\d+/g); // 숫자 싹 다 뽑기 [2026, 05, 15, 19, 30, ...]
             
             if (n && n.length >= 5) {
-                let hh = (parseInt(n[3]) + 9) % 24; // 19 + 9 = 28 -> 4시
-                displayTime = `${hh < 10 ? '0' + hh : hh}:${n[4]}:${n[5] || '00'}`;
+                let mm = n[1]; // 월
+                let dd = n[2]; // 일
+                let hh = (parseInt(n[3]) + 9) % 24; // 한국 시간 보정
+                let min = n[4]; // 분
+                
+                const hhStr = hh < 10 ? '0' + hh : hh;
+                
+                // 표시 형식: "05/15 04:30"
+                displayDateTime = `${mm}/${dd} ${hhStr}:${min}`;
             }
+        } catch (e) {
+            displayDateTime = "날짜 오류";
+        }
 
-            return `
-                <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
-                    <div class="time-badge">${displayTime}</div>
-                    <h3 style="margin:0;">테이블 ${o.tableNo}</h3>
-                    <p style="margin:20px 0; font-size:18px;">${o.orderDetails}</p>
-                    <div class="price">${o.totalAmount.toLocaleString()}원</div>
-                    <div style="font-weight:bold; color:${isUnpaid ? '#ff4757' : '#00d1b2'}">
-                        ${isUnpaid ? '⚠️ 현장결제' : '✅ 결제완료'}
-                    </div>
+        return `
+            <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
+                <div class="time-badge">${displayDateTime}</div>
+                <h3 style="margin:0;">테이블 ${o.tableNo}</h3>
+                <p style="margin:20px 0; font-size:18px;">${o.orderDetails}</p>
+                <div class="price">${o.totalAmount.toLocaleString()}원</div>
+                <div style="font-weight:bold; color:${isUnpaid ? '#ff4757' : '#00d1b2'}">
+                    ${isUnpaid ? '⚠️ 현장결제' : '✅ 결제완료'}
                 </div>
-            `;
-        }).join('');
-    }
+            </div>
+        `;
+    }).join('');
+}
 </script>
 </body>
 </html>
