@@ -122,16 +122,12 @@ HTML
     div.innerHTML = orders.map(o => {
         const isUnpaid = !String(o.payStatus).includes("완료");
         
-        // ★ 강제 시간 교정 로직 ★
-        let orderDate = new Date(o.timestamp);
-        
-        // 만약 시간이 현재 시간보다 너무 과거(9시간 전)로 나온다면 강제로 9시간 더하기
-        // (서버가 UTC 기준으로 보내는데 Z가 없을 때 해결법)
-        if (o.timestamp && !o.timestamp.includes('Z')) {
-            orderDate.setHours(orderDate.getHours() + 9);
-        }
+        // ★ 한국 시간 강제 계산 (9시간 더하기) ★
+        const date = new Date(o.timestamp);
+        // 서버 시간이 UTC(영국) 기준이므로 한국 시간(+9)으로 강제 변환
+        const korTime = new Date(date.getTime() + (9 * 60 * 60 * 1000));
 
-        const timeString = orderDate.toLocaleTimeString('ko-KR', {
+        const timeString = korTime.toLocaleTimeString('ko-KR', {
             hour: '2-digit',
             minute: '2-digit',
             hour12: false 
