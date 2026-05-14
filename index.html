@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>스마트 오더 - 주문하기</title>
+    <title>세븐 미라클 - 스마트 오더</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; color: #333; }
         header { background-color: #ff6b6b; color: white; text-align: center; padding: 1rem; font-size: 1.5rem; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -13,9 +13,7 @@
         .menu-info p { margin: 0; color: #ff6b6b; font-weight: bold; }
         .controls { display: flex; align-items: center; gap: 10px; }
         button { background-color: #ff6b6b; color: white; border: none; border-radius: 4px; padding: 5px 10px; font-size: 1rem; cursor: pointer; }
-        button:active { background-color: #e55a5a; }
         .cart-summary { background: white; padding: 1rem; border-radius: 8px; margin-top: 2rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .cart-summary h2 { margin-top: 0; border-bottom: 2px solid #f4f7f6; padding-bottom: 0.5rem; }
         .total { font-size: 1.5rem; font-weight: bold; text-align: right; margin: 1rem 0; color: #ff6b6b; }
         .payment-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1rem; }
         .payment-options label { background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px solid #ddd; display: flex; align-items: center; gap: 10px; cursor: pointer; }
@@ -48,10 +46,10 @@
 </div>
 
 <script>
-    // [중요] 반드시 구글 스크립트 '새 배포' 주소를 여기에 넣으세요!
+    // [확인] 구글 스크립트 '새 배포' 주소가 맞는지 마지막으로 확인하세요!
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyc_mKiGen665Hqh8YCTRYb0pfOs7cquF7VV2d5vgJ49iR2u1JwlYSU4ol4QbhDo4s3rA/exec';
     
-    const OWNER_ACCOUNT = '국민은행 123456-78-901234 홍길동'; // 실제 계좌로 수정하세요
+    const OWNER_ACCOUNT = '국민은행 123456-78-901234 홍길동';
 
     const menus = [
         { id: 1, name: '아메리카노', price: 3000 },
@@ -121,10 +119,9 @@
         if (orderItems.length === 0) { alert('메뉴를 선택해주세요.'); return; }
         const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
 
-        // 결제 방식별 안내
         if (paymentMethod === '계좌 이체') {
             await navigator.clipboard.writeText(OWNER_ACCOUNT);
-            alert(`계좌번호가 복사되었습니다: ${OWNER_ACCOUNT}\n${totalAmount.toLocaleString()}원을 입금해 주세요.`);
+            alert(`계좌번호가 복사되었습니다: ${OWNER_ACCOUNT}`);
         }
 
         const orderData = {
@@ -139,27 +136,30 @@
         btn.textContent = '전송 중...';
 
         try {
-            // 구글 스크립트 전송 (CORS 무시 위해 no-cors 사용)
             await fetch(SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                cache: 'no-cache',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderData)
             });
 
-            alert('주문이 성공적으로 접수되었습니다!');
+            alert('주문이 접수되었습니다!');
             cart = {};
             document.getElementById('tableNo').value = '';
             renderMenu();
             updateCartSummary();
         } catch (error) {
-            alert('전송 오류가 발생했습니다. 카운터에 말씀해주세요.');
-            console.error(error);
+            alert('오류 발생! 카운터에 문의하세요.');
         } finally {
             btn.disabled = false;
             btn.textContent = '주문하기';
         }
+    }
+
+    renderMenu();
+</script>
+</body>
+</html>
     }
 
     renderMenu();
