@@ -75,36 +75,34 @@
         } catch (e) { console.log("Error"); }
     }
 
-   function render(orders) {
+  function render(orders) {
     const div = document.getElementById('orders');
     div.innerHTML = orders.map(o => {
         const isUnpaid = !String(o.payStatus).includes("완료");
         
-        let displayDateTime = "";
+        let displayDateTime = "확인중";
         try {
             const raw = String(o.timestamp);
             const n = raw.match(/\d+/g); 
             
-            // 1. 데이터에 날짜 숫자가 충분히 들어있는 경우 (정상)
-            if (n && n.length >= 3) {
-                let month = n[1];
-                let day = n[2];
-                let hh = (parseInt(n[3] || 0) + 9) % 24;
-                let mm = n[4] || "00";
-                const hhStr = hh < 10 ? '0' + hh : hh;
-                displayDateTime = `${month}/${day} ${hhStr}:${mm}`;
-            } 
-            // 2. 날짜 숫자가 부족하면 PC의 현재 날짜를 강제로 가져다 씀 (필살기)
-            else {
-                const now = new Date();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                const hh = String(now.getHours()).padStart(2, '0');
-                const mm = String(now.getMinutes()).padStart(2, '0');
-                displayDateTime = `${month}/${day} ${hh}:${mm}`;
+            if (n && n.length >= 5) {
+                // 1. 서버 날짜와 시간으로 '날짜 객체'를 만듭니다.
+                // 월은 0부터 시작하므로 n[1]-1을 해줍니다.
+                let dt = new Date(n[0], n[1]-1, n[2], n[3], n[4], n[5] || 0);
+                
+                // 2. 한국 시간 보정 (9시간 더하기)
+                // 이 과정에서 24시가 넘으면 자동으로 다음날(15일)로 바뀝니다!
+                dt.setHours(dt.getHours() + 9);
+                
+                let mm = String(dt.getMonth() + 1).padStart(2, '0');
+                let dd = String(dt.getDate()).padStart(2, '0');
+                let hh = String(dt.getHours()).padStart(2, '0');
+                let min = String(dt.getMinutes()).padStart(2, '0');
+                
+                displayDateTime = `${mm}/${dd} ${hh}:${min}`;
             }
         } catch (e) {
-            displayDateTime = "05/15 시간확인"; // 최후의 수단
+            displayDateTime = "05/15 시간확인"; 
         }
 
         return `
