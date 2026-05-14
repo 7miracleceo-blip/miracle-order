@@ -83,32 +83,29 @@
         } catch (e) { console.log("데이터 수신 오류"); }
     }
 
- function render(orders) {
+function render(orders) {
     const div = document.getElementById('orders');
     div.innerHTML = orders.map(o => {
         const isUnpaid = !String(o.payStatus).includes("완료");
         
-        // ★★★ 글자 강제 분해 및 9시간 더하기 (필살기) ★★★
+        // ★★★ 어떤 형식이든 9시간 더해서 한국 시간으로 만드는 마법 ★★★
         let displayTime = "시간 확인중";
         try {
-            const raw = String(o.timestamp); // "2026-05-14T19:30:38.000"
+            const raw = String(o.timestamp); // "2026-05-14T19:36:38.000Z"
             
-            // 1. T 뒤에 있는 "19:30:38" 부분만 잘라냅니다.
-            if (raw.includes('T')) {
-                const fullTime = raw.split('T')[1]; // "19:30:38.000"
-                const timeParts = fullTime.split(':'); // ["19", "30", "38.000"]
+            // 숫자만 싹 다 뽑아냅니다: [2026, 05, 14, 19, 36, 38]
+            const nums = raw.match(/\d+/g); 
+            
+            if (nums && nums.length >= 5) {
+                let hh = parseInt(nums[3]); // 19
+                let mm = nums[4];            // 36
+                let ss = nums[5] || "00";    // 38
                 
-                let hour = parseInt(timeParts[0]); // 19
-                let min = timeParts[1];            // 30
-                let sec = timeParts[2].split('.')[0]; // 38
+                // 무조건 9시간 더하기 (24시 넘어가면 다음날 0시부터)
+                hh = (hh + 9) % 24;
+                const hhStr = hh < 10 ? '0' + hh : hh;
                 
-                // 2. 무조건 한국 시간 9시간을 더합니다. (24시가 넘으면 0시부터 다시 시작)
-                hour = (hour + 9) % 24;
-                const hStr = hour < 10 ? '0' + hour : hour;
-                
-                displayTime = `${hStr}:${min}:${sec}`; // "04:30:38" 완성
-            } else {
-                displayTime = raw; // T가 없으면 원본이라도 표시
+                displayTime = `${hhStr}:${mm}:${ss}`; // 결과: 04:36:38
             }
         } catch (e) {
             displayTime = "시간 오류";
@@ -126,7 +123,6 @@
             </div>
         `;
     }).join('');
-}
 </script>
 </body>
 </html>
