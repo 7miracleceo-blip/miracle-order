@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>세븐 미라클 POS - 정밀 동기화</title>
+    <title>세븐 미라클 POS - 날짜정밀모드</title>
     <style>
         body { background: #121212; color: white; font-family: 'Pretendard', sans-serif; margin: 0; padding: 20px; }
         header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 2px solid #333; margin-bottom: 20px; }
@@ -10,9 +10,9 @@
         #orders { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
         .order-card { background: #252525; border-radius: 15px; padding: 20px; border-top: 10px solid #00d1b2; position: relative; }
         .order-card.unpaid { border-top: 10px solid #ff4757; background: #2d1f1f; }
-        .time-badge { position: absolute; top: 15px; right: 20px; font-size: 18px; font-weight: bold; color: #ffdd57; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 5px; }
+        /* 날짜/시간 배지: 더 잘 보이게 크기 키움 */
+        .time-badge { position: absolute; top: 15px; right: 20px; font-size: 16px; font-weight: bold; color: #ffdd57; background: rgba(0,0,0,0.5); padding: 4px 10px; border-radius: 5px; border: 1px solid #ffdd57; }
         .price { font-size: 26px; font-weight: bold; color: #00d1b2; margin-top: 15px; }
-        .unpaid .price { color: #ff4757; }
         #setup { text-align: center; margin-top: 150px; }
         #start-btn { padding: 30px 60px; font-size: 24px; background: #00d1b2; color: white; border: none; border-radius: 15px; cursor: pointer; }
     </style>
@@ -21,6 +21,7 @@
 
     <div id="setup">
         <h1 style="color:#00d1b2;">SEVEN MIRACLE</h1>
+        <p>날짜와 시간이 포함된 최신 버전을 로드합니다.</p><br>
         <button id="start-btn" onclick="activateSystem()">시스템 시작</button>
     </div>
 
@@ -74,45 +75,40 @@
         } catch (e) { console.log("Error"); }
     }
 
-   function render(orders) {
-    const div = document.getElementById('orders');
-    div.innerHTML = orders.map(o => {
-        const isUnpaid = !String(o.payStatus).includes("완료");
-        
-        // ★ 날짜와 시간을 모두 추출하는 마법 ★
-        let displayDateTime = "확인중";
-        try {
+    function render(orders) {
+        const div = document.getElementById('orders');
+        div.innerHTML = orders.map(o => {
+            const isUnpaid = !String(o.payStatus).includes("완료");
+            
+            // ★ 날짜와 시간을 강제로 조립하는 로직 ★
+            let displayDateTime = "날짜 확인중";
             const raw = String(o.timestamp);
-            const n = raw.match(/\d+/g); // 숫자 싹 다 뽑기 [2026, 05, 15, 19, 30, ...]
+            const n = raw.match(/\d+/g); 
             
             if (n && n.length >= 5) {
-                let mm = n[1]; // 월
-                let dd = n[2]; // 일
+                let month = n[1]; // 월
+                let day = n[2];   // 일
                 let hh = (parseInt(n[3]) + 9) % 24; // 한국 시간 보정
-                let min = n[4]; // 분
+                let mm = n[4];    // 분
                 
                 const hhStr = hh < 10 ? '0' + hh : hh;
-                
-                // 표시 형식: "05/15 04:30"
-                displayDateTime = `${mm}/${dd} ${hhStr}:${min}`;
+                // "05/15 05:01" 형식으로 조립
+                displayDateTime = month + "/" + day + " " + hhStr + ":" + mm;
             }
-        } catch (e) {
-            displayDateTime = "날짜 오류";
-        }
 
-        return `
-            <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
-                <div class="time-badge">${displayDateTime}</div>
-                <h3 style="margin:0;">테이블 ${o.tableNo}</h3>
-                <p style="margin:20px 0; font-size:18px;">${o.orderDetails}</p>
-                <div class="price">${o.totalAmount.toLocaleString()}원</div>
-                <div style="font-weight:bold; color:${isUnpaid ? '#ff4757' : '#00d1b2'}">
-                    ${isUnpaid ? '⚠️ 현장결제' : '✅ 결제완료'}
+            return `
+                <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
+                    <div class="time-badge">${displayDateTime}</div>
+                    <h3 style="margin:0;">테이블 ${o.tableNo}</h3>
+                    <p style="margin:20px 0; font-size:18px;">${o.orderDetails}</p>
+                    <div class="price">${o.totalAmount.toLocaleString()}원</div>
+                    <div style="font-weight:bold; color:${isUnpaid ? '#ff4757' : '#00d1b2'}">
+                        ${isUnpaid ? '⚠️ 현장결제' : '✅ 결제완료'}
+                    </div>
                 </div>
-            </div>
-        `;
-    }).join('');
-}
+            `;
+        }).join('');
+    }
 </script>
 </body>
 </html>
