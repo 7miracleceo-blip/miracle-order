@@ -83,42 +83,48 @@
         } catch (e) { console.log("데이터 수신 오류"); }
     }
 
-    // ★★★ 정밀 시간 변환 핵심 함수 ★★★
-    function render(orders) {
-        const div = document.getElementById('orders');
-        div.innerHTML = orders.map(o => {
-            const isUnpaid = !String(o.payStatus).includes("완료");
+  function render(orders) {
+    const div = document.getElementById('orders');
+    div.innerHTML = orders.map(o => {
+        const isUnpaid = !String(o.payStatus).includes("완료");
+        
+        // ★ 무조건 한국 시간으로 만드는 필살기 ★
+        let displayTime = "시간 확인중";
+        try {
+            const raw = String(o.timestamp);
+            // 날짜와 시간 숫자를 싹 다 뽑아냅니다
+            const matches = raw.match(/\d+/g); // [2026, 05, 14, 19, 27, 05]
             
-            // 1. 서버에서 온 시간 문자열 (예: 2026-05-14T19:20:55)
-            const rawTime = String(o.timestamp);
-            let displayTime = "시간 확인중";
-
-            if (rawTime.includes('T')) {
-                // 2. T를 기준으로 날짜와 시간 분리
-                const parts = rawTime.split('T');
-                const timePart = parts[1].split('.')[0]; // "19:20:55"
-                const [h, m, s] = timePart.split(':');
-
-                // 3. 숫자로 변환해서 강제로 9시간 더하기 (한국 시간 보정)
-                let korHour = (parseInt(h) + 9) % 24;
-                const korHourStr = korHour < 10 ? '0' + korHour : korHour;
+            if (matches && matches.length >= 5) {
+                let hour = parseInt(matches[3]); // 19 (서버 시간)
+                let min = matches[4];            // 27
+                let sec = matches[5] || "00";    // 05
                 
-                displayTime = `${korHourStr}:${m}:${s}`; // "04:20:55" 완성!
+                // 한국 시간으로 강제 9시간 추가
+                hour = (hour + 9) % 24;
+                const hStr = hour < 10 ? '0' + hour : hour;
+                
+                displayTime = `${hStr}:${min}:${sec}`; // 결과: 04:27:05
+            } else {
+                displayTime = raw; // 정 안되면 원본이라도 표시
             }
+        } catch (e) {
+            displayTime = "시간 오류";
+        }
 
-            return `
-                <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
-                    <div class="time-badge">${displayTime}</div>
-                    <h3 style="margin:0;">테이블 ${o.tableNo}</h3>
-                    <div class="order-details">${o.orderDetails}</div>
-                    <div class="price">${o.totalAmount.toLocaleString()}원</div>
-                    <div style="margin-top:10px; font-weight:bold; color:${isUnpaid ? '#ff4757' : '#00d1b2'}">
-                        ${isUnpaid ? '⚠️ 현장결제 필요' : '✅ 결제완료'}
-                    </div>
+        return `
+            <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
+                <div class="time-badge">${displayTime}</div>
+                <h3 style="margin:0;">테이블 ${o.tableNo}</h3>
+                <div class="order-details">${o.orderDetails}</div>
+                <div class="price">${o.totalAmount.toLocaleString()}원</div>
+                <div style="margin-top:10px; font-weight:bold; color:${isUnpaid ? '#ff4757' : '#00d1b2'}">
+                    ${isUnpaid ? '⚠️ 현장결제 필요' : '✅ 결제완료'}
                 </div>
-            `;
-        }).join('');
-    }
+            </div>
+        `;
+    }).join('');
+}
 </script>
 </body>
 </html>
