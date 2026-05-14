@@ -1,9 +1,3 @@
-대표님, 코드를 보니 맨 아랫부분에 스크립트 태그와 바디 태그가 중복으로 겹쳐서 들어가 있습니다. 이 상태로 저장하면 브라우저가 코드를 읽다가 혼란에 빠져서 제대로 작동하지 않을 수 있어요.
-
-7800X3D PC에서 지금 바로 admin.html의 내용을 아래의 최종 무결점 버전으로 싹 덮어씌워 보세요. 불필요한 중복 코드를 모두 제거하고 깔끔하게 정리했습니다.
-
-🛠️ 수리 완료된 관리자용 코드 (admin.html)
-HTML
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -18,9 +12,9 @@ HTML
         .container { padding: 2rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
         .order-card { background-color: #34495e; border-radius: 12px; padding: 1.5rem; box-shadow: 0 6px 12px rgba(0,0,0,0.2); position: relative; transition: transform 0.2s; border: 1px solid rgba(255,255,255,0.1); }
         .order-card:hover { transform: translateY(-5px); }
-        .bg-red { border-left: 8px solid #e74c3c; }
-        .bg-yellow { border-left: 8px solid #f1c40f; }
-        .bg-green { border-left: 8px solid #2ecc71; }
+        .bg-red { border-left: 8px solid #e74c3c; } /* 후불 */
+        .bg-yellow { border-left: 8px solid #f1c40f; } /* 계좌이체 */
+        .bg-green { border-left: 8px solid #2ecc71; } /* 송금 */
         .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; margin-bottom: 1rem; }
         .table-no { font-size: 1.8rem; font-weight: bold; color: #fff; }
         .time { font-size: 0.9rem; opacity: 0.7; }
@@ -55,7 +49,7 @@ HTML
 </div>
 
 <script>
-    // [확인] 구글 스크립트 '새 배포' 주소가 맞는지 마지막으로 확인하세요!
+    // [중요] 최신 구글 앱스 스크립트 웹앱 주소
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyc_mKiGen665Hqh8YCTRYb0pfOs7cquF7VV2d5vgJ49iR2u1JwlYSU4ol4QbhDo4s3rA/exec';
     
     let lastOrderCount = 0;
@@ -87,7 +81,7 @@ HTML
             
         } catch (error) {
             console.error('오류:', error);
-            document.getElementById('orders-container').innerHTML = `<div style="color:#e74c3c; text-align:center; padding:20px;">연결 오류: ${error.message}<br>구글 주소 확인 및 마우스 클릭을 해주세요.</div>`;
+            document.getElementById('orders-container').innerHTML = `<div style="color:#e74c3c; text-align:center; padding:20px;">연결 오류: ${error.message}<br>구글 스크립트 배포 주소를 확인하고 화면을 클릭해 주세요.</div>`;
         }
     }
 
@@ -95,7 +89,7 @@ HTML
         try {
             const sound = (method && method.includes('후불')) ? document.getElementById('sound-postpaid') : document.getElementById('sound-prepaid');
             sound.play();
-        } catch (e) { console.log("오디오 재생 실패"); }
+        } catch (e) { console.log("소리 재생 실패"); }
     }
 
     function renderOrders(orders) {
@@ -159,4 +153,10 @@ HTML
     };
 </script>
 </body>
+</html>
+        }, { once: true });
+    };
+</script>
+</body>
+</html>
 </html>
