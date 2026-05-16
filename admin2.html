@@ -14,11 +14,8 @@
         .order-card { background-color: #1e293b; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); position: relative; display: flex; flex-direction: column; gap: 10px; }
         .order-card.unpaid { border: 2px solid #ff4757; background-color: #1e1b24; }
         .time-badge { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); color: #ffdd57; padding: 4px 8px; border-radius: 5px; font-size: 13px; font-weight: bold; z-index: 10; }
-        
-        /* 사진이 각 카드 내부에서 이쁘게 고정되는 정위치 스타일 */
         .img-container { width: 100%; height: 180px; border-radius: 10px; overflow: hidden; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); }
         .img-container img { width: 100%; height: 100%; object-fit: cover; }
-        
         h3 { margin: 5px 0 0 0; font-size: 24px; color: #f1f5f9; }
         .details { margin: 0; font-size: 18px; font-weight: bold; color: #cbd5e1; }
         .desc { margin: 5px 0; font-size: 14px; color: #94a3b8; font-style: italic; line-height: 1.4; }
@@ -36,6 +33,7 @@
     </div>
 
     <script>
+        // 💡 [중요] 방금 구글 시트 배포 창에서 복사해온 새 주소를 아래 큰따옴표 안에 넣어주세요!
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOCk_pXJhftUfj3BMtbhMuqRNK1_z8PNFM1Ji_yUxiVcEcnw6IhHxBtwT3eOdq9yYW-A/exec";
         let lastOrderCount = 0;
 
@@ -89,7 +87,7 @@
                 const totalAmountText = o.합계금액 || o.totalAmount || 0;
                 const timestampText = o.타임스탬프 || o.timestamp || "";
                 
-                // 시트지 F열 이미지 주소 다이렉트 매핑
+                // 시트 이미지 주소 연동
                 const sheetImgUrl = o.이미지 || o.image || ""; 
 
                 const isUnpaid = !payStatusText.includes("완료");
@@ -104,7 +102,6 @@
                     }
                 } catch (e) {}
 
-                // 💡 HTML 구조 교정: 이미지 컨테이너가 각 카드 내부(return 반환값 안쪽)에 정확히 귀속되도록 수정 완료
                 return `
                     <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
                         <div class="time-badge">${displayTime}</div>
