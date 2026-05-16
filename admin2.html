@@ -100,23 +100,26 @@
                     }
                 } catch (e) {}
 
-                // 💡 [정공법 컴백] 코드에 주소를 숨겨두지 않고, 구글 시트지 F열(o.이미지)에 대표님이 직접 적어두신 주소를 그대로 직통 연결합니다!
-                let finalImg = o.이미지 ? String(o.이미지).trim() : "";
+                let finalImg = "";
                 const orderText = String(o.orderDetails);
 
-                // 만약 중복 주문 등으로 구글 서버가 주소를 못 넘겨줬을 때를 대비한 텍스트 매칭 보조 시스템
-                if (!finalImg || finalImg === "" || finalImg.length < 10) {
-                    if (orderText.includes("바닐라")) {
-                        finalImg = "https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?q=80&w=500";
-                    } else if (orderText.includes("아메리카노")) {
-                        finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
-                    } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
-                        finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
-                    } else if (orderText.includes("카페라떼") || orderText.includes("라떼") || orderText.includes("라때")) {
-                        finalImg = "https://images.unsplash.com/photo-1534778101976-62847782c213?q=80&w=500";
-                    } else {
-                        finalImg = "https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle";
-                    }
+                // 💡 [무적의 문자열 포함 검사 알고리즘] 뒤에 송금완료, 후불대기 등의 문장이 통째로 붙어있어도 100% 가로챕니다!
+                if (orderText.indexOf("바닐라") !== -1) {
+                    finalImg = "https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?q=80&w=500";
+                } 
+                else if (orderText.indexOf("아메리카노") !== -1) {
+                    finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
+                } 
+                else if (orderText.indexOf("케익") !== -1 || orderText.indexOf("케이크") !== -1 || orderText.indexOf("초코") !== -1) {
+                    finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
+                } 
+                else if (orderText.indexOf("카페라떼") !== -1 || orderText.indexOf("라떼") !== -1 || orderText.indexOf("라때") !== -1) {
+                    finalImg = "https://images.unsplash.com/photo-1534778101976-62847782c213?q=80&w=500";
+                }
+
+                // 이미지 로드 실패 시 무한 루프 에러 방지용 기본 세븐 미라클 플레이스홀더 이미지 지정
+                if (!finalImg || finalImg === "") {
+                    finalImg = "https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle";
                 }
 
                 return `
