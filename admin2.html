@@ -36,7 +36,7 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOCk_pXJhftUfj3BMtbhMuqRNK1_z8PNFM1Ji_yUxiVcEcnw6IhHxBtwT3eOdq9yYW-A/exec";
         let lastOrderCount = 0;
 
-        // 🔊 띵동 소리 알림 시스템 정상화
+        // 🔊 알림음 시스템
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playChime() {
             try {
@@ -91,15 +91,17 @@
             }
             
             div.innerHTML = orders.map(o => {
-                const orderDetailsText = String(o.주문내역 || o.orderDetails || "");
-                const payStatusText = String(o.결제상태 || o.payStatus || "");
-                const tableNoText = o.테이블번호 || o.tableNo || "알수없음";
-                const totalAmountText = o.합계금액 || o.totalAmount || 0;
-                const timestampText = o.타임스탬프 || o.timestamp || "";
+                // 💡 데이터 누락 에러 원천 차단 방어벽 (Null 처리 변환)
+                const orderDetailsText = o ? String(o.주문내역 || o.orderDetails || "") : "";
+                const payStatusText = o ? String(o.결제상태 || o.payStatus || "") : "";
+                const tableNoText = o ? (o.테이블번호 || o.tableNo || "알수없음") : "알수없음";
+                const totalAmountText = o ? (o.합계금액 || o.totalAmount || 0) : 0;
+                const timestampText = o ? (o.타임스탬프 || o.timestamp || "") : "";
+                const descText = o ? (o.설명 || "세븐 미라클의 정성을 담은 메뉴입니다.") : "세븐 미라클의 정성을 담은 메뉴입니다.";
+                const rowNum = o ? (o.row || 2) : 2;
 
                 const isUnpaid = !payStatusText.includes("완료");
                 
-                // 💡 [완벽 교정] 마비의 주범이었던 시간 오타 싹 청소 완료!!
                 let displayTime = "실시간";
                 try {
                     const n = String(timestampText).match(/\d+/g);
@@ -113,7 +115,7 @@
                 let finalImg = "";
                 const orderText = orderDetailsText.replace(/\s+/g, "");
 
-                // 이미지 로딩 우선순위 고정
+                // 💡 [초강력 무적 필터] 글자가 어떻게 들어오든 우선순위 판별 고정
                 if (orderText.includes("바닐라")) {
                     finalImg = "https://images.unsplash.com/photo-1594911774802-8822a707cbb3?q=80&w=500";
                 } else if (orderText.includes("아메리카노")) {
@@ -136,12 +138,12 @@
                         
                         <h3>테이블 ${tableNoText}</h3>
                         <p class="details">${orderDetailsText}</p>
-                        <p class="desc">${o.설명 || "세븐 미라클의 정성을 담은 메뉴입니다."}</p>
+                        <p class="desc">${descText}</p>
                         <div class="amount">${Number(totalAmountText).toLocaleString()}원</div>
                         
                         <div style="margin-top:auto; padding-top:10px;">
                             ${isUnpaid 
-                                ? `<button onclick="markAsPaid(${o.row})">💳 결제 완료 처리</button>` 
+                                ? `<button onclick="markAsPaid(${rowNum})">💳 결제 완료 처리</button>` 
                                 : `<div class="paid-badge">✅ 결제 완료</div>`
                             }
                         </div>
