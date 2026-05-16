@@ -93,7 +93,8 @@
                     if (n && n.length >= 5) {
                         let dt = new Date(n[0], n[1]-1, n[2], n[3], n[4]);
                         dt.setHours(dt.getHours() + 9);
-                        displayTime = `${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${n[4]}`;
+                        // ⭐️ 분(Minutes) 표시 오타 보정 및 2자리 정렬 패치 완료!
+                        displayTime = `${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
                     }
                 } catch (e) {}
 
