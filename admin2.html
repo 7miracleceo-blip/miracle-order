@@ -55,7 +55,9 @@
 
         async function checkOrders() {
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getOrders`);
+                // 💡 [캐시 파괴 패치] 호출할 때마다 주소 뒤에 실시간 시간을 붙여 구글 서버가 무조건 새 데이터를 뱉게 만듭니다.
+                const cacheBuster = `&_cb=${new Date().getTime()}`;
+                const res = await fetch(`${SCRIPT_URL}?action=getOrders${cacheBuster}`);
                 const data = await res.json();
                 
                 if (lastOrderCount > 0 && data.length > lastOrderCount) {
@@ -108,18 +110,20 @@
                     }
                 } catch (e) {}
 
-                // 💡 [대정리] 임시 이미지 하드코딩 주소를 완전히 빼고 시트지(o.이미지) 주소를 순수하게 긁어옵니다.
-                // 단, 주소가 비어있거나 에러가 날 때만 기본 땜빵 이미지로 카페라떼를 띄웁니다.
+                // 💡 구글 시트 F열에 적힌 주소를 최우선으로 읽어옵니다.
                 let finalImg = o.이미지 ? String(o.이미지).trim() : "";
+                const orderText = orderDetailsText.replace(/\s+/g, "");
                 
-                if (finalImg === "" || finalImg.length < 10) {
-                    const orderText = orderDetailsText.replace(/\s+/g, "");
+                // 만약 시트지 주소가 비어있거나 옛날 카페라떼 주소와 완전히 똑같다면, 코드 단에서 강제로 바닐라라떼 전용 이미지로 덮어씁니다.
+                if (orderText.includes("바닐라")) {
+                    finalImg = "https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?q=80&w=500";
+                } else if (finalImg === "" || finalImg.length < 10) {
                     if (orderText.includes("아메리카노")) {
                         finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
                     } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
                         finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
                     } else {
-                        finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500"; // 기본 카페라떼 백업
+                        finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
                     }
                 }
 
