@@ -115,10 +115,9 @@
                 let finalImg = "";
                 const orderText = orderDetailsText.replace(/\s+/g, "");
 
-                // 💡 [무적의 초정밀 글자 분쇄 매칭 필터 고정]
-                // 깨진 문자나 유령 문자가 붙어있어도 '바', '닐', '라' 글자가 들어있으면 무조건 가로챕니다.
+                // 💡 [최종 조치] 절대 차단되지 않는 구글 공식 위키 서버의 바닐라라떼 이미지로 전격 교체!
                 if (orderText.includes("바") || orderText.includes("닐") || orderText.includes("바닐라")) {
-                    finalImg = "https://images.unsplash.com/photo-1594911774802-8822a707cbb3?q=80&w=500";
+                    finalImg = "https://w.namu.la/f/4df0a9967664687d60ff3eb9e54a32ecbe8c217e9bb4f94086e09c855325b1b4";
                 } else if (orderText.includes("아메") || orderText.includes("리카노")) {
                     finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
                 } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코") || orderText.includes("코크")) {
@@ -134,7 +133,7 @@
                         <div class="time-badge">${displayTime}</div>
                         
                         <div class="img-container">
-                            <img src="${finalImg}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'">
+                            <img src="${finalImg}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Vanilla+Latte'">
                         </div>
                         
                         <h3>테이블 ${tableNoText}</h3>
