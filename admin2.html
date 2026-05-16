@@ -50,7 +50,7 @@
                 gain.connect(audioCtx.destination);
                 osc.start();
                 osc.stop(audioCtx.currentTime + 0.6);
-            } catch (e) { console.log("오디오 재생 제한", e); }
+            } catch (e) {}
         }
 
         async function checkOrders() {
@@ -100,27 +100,23 @@
                     }
                 } catch (e) {}
 
-                let finalImg = "";
+                // 💡 [정공법 컴백] 코드에 주소를 숨겨두지 않고, 구글 시트지 F열(o.이미지)에 대표님이 직접 적어두신 주소를 그대로 직통 연결합니다!
+                let finalImg = o.이미지 ? String(o.이미지).trim() : "";
                 const orderText = String(o.orderDetails);
 
-                // 💡 [초안정 국내 서버 기반 우회 주소로 올인]
-                if (orderText.indexOf("바닐라") !== -1) {
-                    // ☕ 따뜻한 유리잔에 담긴 완벽한 고화질 바닐라라떼 전용 이미지 (국내 망 최적화)
-                    finalImg = "https://blog.kakaocdn.net/bnaf/cfs15/blog/2008/09/25/11/48/48db005697d8b";
-                } 
-                else if (orderText.indexOf("아메리카노") !== -1) {
-                    finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
-                } 
-                else if (orderText.indexOf("케익") !== -1 || orderText.indexOf("케이크") !== -1 || orderText.indexOf("초코") !== -1) {
-                    finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
-                } 
-                else if (orderText.indexOf("카페라떼") !== -1 || orderText.indexOf("라떼") !== -1 || orderText.indexOf("라때") !== -1) {
-                    // ☕ 하트 라떼 아트가 선명한 고화질 카페라떼 공식 이미지
-                    finalImg = "https://blog.kakaocdn.net/dn/b7oWNo/btqChwG9p3e/gKknNKhW1X8Xm86gC4F6Vk/img.jpg";
-                }
-
-                if (!finalImg || finalImg === "") {
-                    finalImg = "https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle";
+                // 만약 중복 주문 등으로 구글 서버가 주소를 못 넘겨줬을 때를 대비한 텍스트 매칭 보조 시스템
+                if (!finalImg || finalImg === "" || finalImg.length < 10) {
+                    if (orderText.includes("바닐라")) {
+                        finalImg = "https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?q=80&w=500";
+                    } else if (orderText.includes("아메리카노")) {
+                        finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
+                    } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
+                        finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
+                    } else if (orderText.includes("카페라떼") || orderText.includes("라떼") || orderText.includes("라때")) {
+                        finalImg = "https://images.unsplash.com/photo-1534778101976-62847782c213?q=80&w=500";
+                    } else {
+                        finalImg = "https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle";
+                    }
                 }
 
                 return `
