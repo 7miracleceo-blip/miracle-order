@@ -77,7 +77,9 @@
                 if (result.result === "success") {
                     checkOrders();
                 }
-            } catch (e) {}
+            } catch (e) {
+                alert("통신 오류가 발생했습니다.");
+            }
         }
 
         function render(orders) {
@@ -88,11 +90,18 @@
             }
             
             div.innerHTML = orders.map(o => {
-                const isUnpaid = !String(o.payStatus).includes("완료");
+                // 💡 대표님 시트의 한글 이름 변수 매핑 보완 (주문내역, 결제상태, 합계금액, 테이블번호, 타임스탬프)
+                const orderDetailsText = String(o.주문내역 || o.orderDetails || "");
+                const payStatusText = String(o.결제상태 || o.payStatus || "");
+                const tableNoText = o.테이블번호 || o.tableNo || "알수없음";
+                const totalAmountText = o.합계금액 || o.totalAmount || 0;
+                const timestampText = o.타임스탬프 || o.timestamp || "";
+
+                const isUnpaid = !payStatusText.includes("완료");
                 
                 let displayTime = "실시간";
                 try {
-                    const n = String(o.timestamp).match(/\d+/g);
+                    const n = String(timestampText).match(/\d+/g);
                     if (n && n.length >= 5) {
                         let dt = new Date(n[0], n[1]-1, n[2], n[3], n[4]);
                         dt.setHours(dt.getHours() + 9);
@@ -101,24 +110,18 @@
                 } catch (e) {}
 
                 let finalImg = "";
-                const orderText = String(o.orderDetails);
+                const orderText = orderDetailsText.replace(/\s+/g, "");
 
-                // 💡 [무적의 문자열 포함 검사 알고리즘] 뒤에 송금완료, 후불대기 등의 문장이 통째로 붙어있어도 100% 가로챕니다!
-                if (orderText.indexOf("바닐라") !== -1) {
-                    finalImg = "https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?q=80&w=500";
-                } 
-                else if (orderText.indexOf("아메리카노") !== -1) {
+                // 이미지 차단 없는 안전한 최고화질 Unsplash 직링크 구조 고정
+                if (orderText.includes("바닐라")) {
+                    finalImg = "https://images.unsplash.com/photo-1594911774802-8822a707cbb3?q=80&w=500";
+                } else if (orderText.includes("아메리카노")) {
                     finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
-                } 
-                else if (orderText.indexOf("케익") !== -1 || orderText.indexOf("케이크") !== -1 || orderText.indexOf("초코") !== -1) {
+                } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
                     finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
-                } 
-                else if (orderText.indexOf("카페라떼") !== -1 || orderText.indexOf("라떼") !== -1 || orderText.indexOf("라때") !== -1) {
-                    finalImg = "https://images.unsplash.com/photo-1534778101976-62847782c213?q=80&w=500";
-                }
-
-                // 이미지 로드 실패 시 무한 루프 에러 방지용 기본 세븐 미라클 플레이스홀더 이미지 지정
-                if (!finalImg || finalImg === "") {
+                } else if (orderText.includes("카페라떼") || orderText.includes("라떼")) {
+                    finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
+                } else {
                     finalImg = "https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle";
                 }
 
@@ -130,10 +133,10 @@
                             <img src="${finalImg}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'">
                         </div>
                         
-                        <h3>테이블 ${o.tableNo}</h3>
-                        <p class="details">${o.orderDetails}</p>
+                        <h3>테이블 ${tableNoText}</h3>
+                        <p class="details">${orderDetailsText}</p>
                         <p class="desc">${o.설명 || "세븐 미라클의 정성을 담은 메뉴입니다."}</p>
-                        <div class="amount">${Number(o.totalAmount).toLocaleString()}원</div>
+                        <div class="amount">${Number(totalAmountText).toLocaleString()}원</div>
                         
                         <div style="margin-top:auto; padding-top:10px;">
                             ${isUnpaid 
