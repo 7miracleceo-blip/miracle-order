@@ -90,8 +90,6 @@
             }
             
             div.innerHTML = orders.map(o => {
-                // 💡 [무적 엔진 탑재] 한글 이름이 깨지든 영어가 깨지든, 데이터의 '위치(순서)'로 강제 매핑합니다!
-                // 대표님 시트 구조: 1:시간, 2:테이블번호, 3:주문내역, 4:합계금액, 5:결제방식, 6:결제상태, 7:이미지, 8:설명
                 const rawKeys = Object.keys(o);
                 
                 const orderDetailsText = String(o["주문내역"] || o["orderDetails"] || o[rawKeys[2]] || "");
@@ -117,14 +115,15 @@
                 let finalImg = "";
                 const orderText = orderDetailsText.replace(/\s+/g, "");
 
-                // 💡 [우선순위 최종 검증 고정]
-                if (orderText.includes("바닐라")) {
+                // 💡 [무적의 초정밀 글자 분쇄 매칭 필터 고정]
+                // 깨진 문자나 유령 문자가 붙어있어도 '바', '닐', '라' 글자가 들어있으면 무조건 가로챕니다.
+                if (orderText.includes("바") || orderText.includes("닐") || orderText.includes("바닐라")) {
                     finalImg = "https://images.unsplash.com/photo-1594911774802-8822a707cbb3?q=80&w=500";
-                } else if (orderText.includes("아메리카노")) {
+                } else if (orderText.includes("아메") || orderText.includes("리카노")) {
                     finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
-                } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
+                } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코") || orderText.includes("코크")) {
                     finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
-                } else if (orderText.includes("카페라떼") || orderText.includes("라떼")) {
+                } else if (orderText.includes("카페") || orderText.includes("라떼") || orderText.includes("떼")) {
                     finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
                 } else {
                     finalImg = "https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle";
