@@ -46,7 +46,7 @@
             <img class="menu-img" src="https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500">
             <div class="menu-info">
                 <p class="menu-title">카페라떼</p>
-                <p class="menu-desc">1A등급 신선한 원유와 에스프레소의 부드러운 조화</p>
+                <p class="menu-desc">1A등급 신선한 원유และ 에스프레소의 부드러운 조화</p>
                 <p class="menu-price">4,000원</p>
                 <button class="btn-add" onclick="addToCart('카페라떼', 4000)">담기</button>
             </div>
@@ -80,7 +80,8 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "index.html";
+        // ⭐️ 대표님이 알려주신 진짜 구글 배포 주소로 확실하게 교체 완료!
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvf3Mu-p8lkNgt1a3k9XVO8-HWZ8jIc6s_bA3Wa0Gyr8ENmud6D9iDuCj0QQB6g5iNVw/exec";
         let cart = {}; let tableNo = "1";
 
         try {
@@ -108,14 +109,12 @@
             if(!confirm(`[테이블 ${tableNo}] ${orderStr} 주문하시겠습니까?`)) return;
 
             try {
-                // 대표님 시트 헤더명과 완벽 동기화해 실시간 강제 전송 연동
                 const url = `${SCRIPT_URL}?action=addOrder&tableNo=${tableNo}&orderDetails=${encodeURIComponent(orderStr)}&totalAmount=${total}`;
                 await fetch(url, { mode: 'no-cors' });
                 alert("주문이 포스로 성공적으로 전송되었습니다!");
                 cart = {}; updateCartBar();
             } catch(e) {
-                alert("주문이 전송되었습니다!");
-                cart = {}; updateCartBar();
+                alert("주문 전송 중 문제가 발생했습니다.");
             }
         }
     </script>
