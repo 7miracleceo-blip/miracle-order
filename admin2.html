@@ -18,7 +18,7 @@
         .img-container img { width: 100%; height: 100%; object-fit: cover; }
         h3 { margin: 5px 0 0 0; font-size: 24px; color: #f1f5f9; }
         .details { margin: 0; font-size: 18px; font-weight: bold; color: #cbd5e1; }
-        .desc { margin: 5px 0; font-size: 14px; color: #94a3b8; font-style: italic; line-height: 1.4; }
+        .desc { margin: 5px 0; font-size: 14px; color: #e2e8f0; font-style: italic; line-height: 1.4; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; }
         .amount { font-size: 22px; font-weight: bold; color: #00d1b2; margin-top: 5px; }
         button { width: 100%; padding: 12px; background: #ff4757; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: background 0.2s; }
         button:hover { background: #ff6b81; }
@@ -55,7 +55,6 @@
 
         async function checkOrders() {
             try {
-                // 💡 [캐시 파괴 패치] 호출할 때마다 주소 뒤에 실시간 시간을 붙여 구글 서버가 무조건 새 데이터를 뱉게 만듭니다.
                 const cacheBuster = `&_cb=${new Date().getTime()}`;
                 const res = await fetch(`${SCRIPT_URL}?action=getOrders${cacheBuster}`);
                 const data = await res.json();
@@ -92,11 +91,17 @@
             }
             
             div.innerHTML = orders.map(o => {
-                const orderDetailsText = String(o.orderDetails || o.주문내역 || "");
-                const payStatusText = String(o.payStatus || o.결제상태 || o.결재상태 || "");
-                const tableNoText = o.tableNo || o.테이블번호 || "1";
-                const totalAmountText = o.totalAmount || o.합계금액 || 0;
-                const timestampText = o.timestamp || o.타임스탬프 || "";
+                // 💡 한글 유연 매핑 시스템 구축 (시트지 이름 매칭 우선)
+                const orderDetailsText = String(o.주문내역 || o.orderDetails || "").trim();
+                const payStatusText = String(o.결제상태 || o.결재상태 || o.payStatus || "");
+                const tableNoText = o.테이블번호 || o.tableNo || "1";
+                const totalAmountText = o.합계금액 || o.totalAmount || 0;
+                const timestampText = o.타임스탬프 || o.timestamp || "";
+                
+                // 💡 시트지에 대표님이 직접 적은 메뉴설명과 이미지 주소를 정확히 추출
+                const menuDesc = o.메뉴설명 || o.설명 || o.menuDesc || "세븐 미라클의 정성을 담은 메뉴입니다.";
+                let finalImg = o.이미지 || o.사진 || o.imageUrl || "";
+                finalImg = String(finalImg).trim();
 
                 const isUnpaid = !payStatusText.includes("완료");
                 
@@ -110,17 +115,17 @@
                     }
                 } catch (e) {}
 
-                // 💡 구글 시트 F열에 적힌 주소를 최우선으로 읽어옵니다.
-                let finalImg = o.이미지 ? String(o.이미지).trim() : "";
-                const orderText = orderDetailsText.replace(/\s+/g, "");
-                
-                // 만약 시트지 주소가 비어있거나 옛날 카페라떼 주소와 완전히 똑같다면, 코드 단에서 강제로 바닐라라떼 전용 이미지로 덮어씁니다.
-                if (orderText.includes("바닐라")) {
+                // 글자 강제 필터 (시트지 에러 방지용 최종 백업)
+                const cleanText = orderDetailsText.replace(/\s+/g, "");
+                if (cleanText.includes("바닐라")) {
                     finalImg = "https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?q=80&w=500";
-                } else if (finalImg === "" || finalImg.length < 10) {
-                    if (orderText.includes("아메리카노")) {
+                }
+
+                // 이미지 주소가 깨졌거나 없을 때만 기본 커피 이미지로 대체
+                if (finalImg === "" || finalImg.length < 10) {
+                    if (cleanText.includes("아메리카노")) {
                         finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
-                    } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
+                    } else if (cleanText.includes("케익") || cleanText.includes("케이크") || cleanText.includes("초코")) {
                         finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
                     } else {
                         finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
@@ -137,7 +142,7 @@
                         
                         <h3>테이블 ${tableNoText}</h3>
                         <p class="details">${orderDetailsText}</p>
-                        <p class="desc">${o.설명 || "세븐 미라클의 정성을 담은 메뉴입니다."}</p>
+                        <p class="desc">📝 ${menuDesc}</p>
                         <div class="amount">${Number(totalAmountText).toLocaleString()}원</div>
                         
                         <div style="margin-top:auto; padding-top:10px;">
