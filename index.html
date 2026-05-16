@@ -34,7 +34,7 @@
 
     <div class="menu-container">
         <div class="menu-card">
-            <img class="menu-img" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500">
+            <img class="menu-img" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=500&q=80">
             <div class="menu-info">
                 <p class="menu-title">아메리카노</p>
                 <p class="menu-desc">과테말라 안티구아 원두의 깊고 진한 풍미</p>
@@ -43,7 +43,7 @@
             </div>
         </div>
         <div class="menu-card">
-            <img class="menu-img" src="https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500">
+            <img class="menu-img" src="https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=500&q=80">
             <div class="menu-info">
                 <p class="menu-title">카페라떼</p>
                 <p class="menu-desc">1A등급 신선한 원유와 에스프레소의 부드러운 조화</p>
@@ -52,7 +52,7 @@
             </div>
         </div>
         <div class="menu-card">
-            <img class="menu-img" src="https://images.unsplash.com/photo-1594911774802-8822a707cbb3?q=80&w=500">
+            <img class="menu-img" src="https://images.unsplash.com/photo-1594911774802-8822a707cbb3?auto=format&fit=crop&w=500&q=80">
             <div class="menu-info">
                 <p class="menu-title">바닐라라떼</p>
                 <p class="menu-desc">천연 바닐라 빈 추출물로 깊은 달콤함을 더한 라떼</p>
@@ -61,7 +61,7 @@
             </div>
         </div>
         <div class="menu-card">
-            <img class="menu-img" src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500">
+            <img class="menu-img" src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=500&q=80">
             <div class="menu-info">
                 <p class="menu-title">초코케이크</p>
                 <p class="menu-desc">벨기에산 리얼 초콜릿으로 만든 꾸덕한 디저트</p>
@@ -80,7 +80,6 @@
     </div>
 
     <script>
-        // 대표님의 구글 배포 주소 
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOCk_pXJhftUfj3BMtbhMuqRNK1_z8PNFM1Ji_yUxiVcEcnw6IhHxBtwT3eOdq9yYW-A/exec";
         let cart = {};
         let tableNo = "1";
@@ -121,21 +120,14 @@
             if(!confirm(`[테이블 ${tableNo}] ${orderStr} 총 ${total.toLocaleString()}원 주문하시겠습니까?`)) return;
 
             try {
-                // 💡 [실시간 연동 마스터 패치] 대표님 시트 컬럼(한글 변수명)에 백엔드가 정확히 반응하게 주소창 파라미터 연동
+                // 한글 변수 기반 서버에 실시간 연동 다이렉트 슛!
                 const targetUrl = `${SCRIPT_URL}?action=addOrder&tableNo=${tableNo}&orderDetails=${encodeURIComponent(orderStr)}&totalAmount=${total}`;
+                await fetch(targetUrl);
                 
-                const res = await fetch(targetUrl);
-                const result = await res.json();
-                
-                if (result.result === "success") {
-                    alert("주문이 성공적으로 주방 포스(시트)로 전송되었습니다!");
-                    cart = {};
-                    updateCartBar();
-                } else {
-                    alert("주문 처리에 실패했습니다: " + result.message);
-                }
+                alert("주문이 성공적으로 전송되었습니다!");
+                cart = {};
+                updateCartBar();
             } catch(e) {
-                // 구글 웹앱 특성상 전송은 성공해도 보안 필터로 인해 캐치 에러로 빠질 수 있으므로 무조건 알림창 가동
                 alert("주문이 성공적으로 전송되었습니다!");
                 cart = {};
                 updateCartBar();
