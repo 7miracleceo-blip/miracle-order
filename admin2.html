@@ -90,16 +90,12 @@
             }
             
             div.innerHTML = orders.map(o => {
-                const rawKeys = Object.keys(o);
-                
-                const orderDetailsText = String(o["주문내역"] || o["orderDetails"] || o[rawKeys[2]] || "");
-                const payStatusText = String(o["결제상태"] || o["payStatus"] || o[rawKeys[5]] || "");
-                const tableNoText = o["테이블번호"] || o["tableNo"] || o[rawKeys[1]] || "알수없음";
-                const totalAmountText = o["합계금액"] || o["totalAmount"] || o[rawKeys[3]] || 0;
-                const timestampText = o["타임스탬프"] || o["timestamp"] || o[rawKeys[0]] || "";
-                const descText = o["설명"] || o["desc"] || o[rawKeys[7]] || "세븐 미라클의 정성을 담은 메뉴입니다.";
-                const sheetImgUrl = o["이미지"] || o["image"] || o[rawKeys[6]] || "";
-                const rowNum = o.row || 2;
+                // 💡 '결제상태'와 오타난 '결재상태' 둘 다 완벽 방어 매핑
+                const orderDetailsText = String(o.주문내역 || o.orderDetails || "");
+                const payStatusText = String(o.결제상태 || o.결재상태 || o.payStatus || "");
+                const tableNoText = o.테이블번호 || o.tableNo || "1";
+                const totalAmountText = o.합계금액 || o.totalAmount || 0;
+                const timestampText = o.타임스탬프 || o.timestamp || "";
 
                 const isUnpaid = !payStatusText.includes("완료");
                 
@@ -109,28 +105,24 @@
                     if (n && n.length >= 5) {
                         let dt = new Date(n[0], n[1]-1, n[2], n[3], n[4]);
                         dt.setHours(dt.getHours() + 9);
-                        displayTime = `${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')} : ${n[4]}`;
+                        displayTime = `${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${n[4]}`;
                     }
                 } catch (e) {}
 
                 let finalImg = "";
                 const orderText = orderDetailsText.replace(/\s+/g, "");
 
-                // 💡 [초간결 팩트 로직 고정]
-                // 대표님이 시트지 G열에 고쳐 넣으신 그 무적 주소를 1순위로 다이렉트 로딩합니다!
-                if (sheetImgUrl && sheetImgUrl.trim() !== "" && sheetImgUrl.length > 15) {
-                    finalImg = sheetImgUrl.trim();
+                // 💡 절대 안 깨지는 초안정 직링크 이미지 고정
+                if (orderText.includes("바닐라")) {
+                    finalImg = "https://images.unsplash.com/photo-1594911774802-8822a707cbb3?q=80&w=500";
+                } else if (orderText.includes("아메리카노")) {
+                    finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
+                } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
+                    finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
+                } else if (orderText.includes("카페라떼") || orderText.includes("라떼")) {
+                    finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
                 } else {
-                    // 혹시라도 시트지가 비어있을 때를 대비한 2차 백업 방어벽
-                    if (orderText.includes("바닐라") || orderText.includes("바") || orderText.includes("닐")) {
-                        finalImg = "https://cdn.pixabay.com/photo/2017/08/07/22/57/coffee-2608864_1280.jpg";
-                    } else if (orderText.includes("아메") || orderText.includes("리카노")) {
-                        finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
-                    } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
-                        finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
-                    } else {
-                        finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
-                    }
+                    finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
                 }
 
                 return `
@@ -138,17 +130,17 @@
                         <div class="time-badge">${displayTime}</div>
                         
                         <div class="img-container">
-                            <img src="${finalImg}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'">
+                            <img src="${finalImg}" onerror="this.src='https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500'">
                         </div>
                         
                         <h3>테이블 ${tableNoText}</h3>
                         <p class="details">${orderDetailsText}</p>
-                        <p class="desc">${descText}</p>
+                        <p class="desc">${o.설명 || "세븐 미라클의 정성을 담은 메뉴입니다."}</p>
                         <div class="amount">${Number(totalAmountText).toLocaleString()}원</div>
                         
                         <div style="margin-top:auto; padding-top:10px;">
                             ${isUnpaid 
-                                ? `<button onclick="markAsPaid(${rowNum})">💳 결제 완료 처리</button>` 
+                                ? `<button onclick="markAsPaid(${o.row})">💳 결제 완료 처리</button>` 
                                 : `<div class="paid-badge">✅ 결제 완료</div>`
                             }
                         </div>
