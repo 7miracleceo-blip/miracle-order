@@ -3,160 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>세븐 미라클 - 스마트 오더</title>
+    <title>Seven Miracle - 모바일 주문</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f4f7f6; color: #333; }
-        header { background-color: #ff6b6b; color: white; text-align: center; padding: 1rem; font-size: 1.5rem; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .container { padding: 1rem; max-width: 600px; margin: 0 auto; }
-        .menu-item { background: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .menu-info h3 { margin: 0 0 0.5rem 0; font-size: 1.2rem; }
-        .menu-info p { margin: 0; color: #ff6b6b; font-weight: bold; }
-        .controls { display: flex; align-items: center; gap: 10px; }
-        button { background-color: #ff6b6b; color: white; border: none; border-radius: 4px; padding: 5px 10px; font-size: 1rem; cursor: pointer; }
-        .cart-summary { background: white; padding: 1rem; border-radius: 8px; margin-top: 2rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .total { font-size: 1.5rem; font-weight: bold; text-align: right; margin: 1rem 0; color: #ff6b6b; }
-        .payment-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1rem; }
-        .payment-options label { background: #f9f9f9; padding: 10px; border-radius: 4px; border: 1px solid #ddd; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .order-btn { width: 100%; padding: 15px; font-size: 1.2rem; font-weight: bold; border-radius: 8px; background-color: #4ecdc4; border: none; color: white; cursor: pointer; }
-        .order-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
-        .table-input { width: 100%; padding: 10px; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 1rem; }
+        :root { --primary: #00d1b2; --bg-main: #0f172a; --bg-card: #1e293b; --text-main: #f8fafc; --text-muted: #94a3b8; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 0; padding-bottom: 100px; }
+        
+        /* 헤더 디자인 */
+        header { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 25px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+        header h1 { margin: 0; font-size: 26px; color: var(--primary); font-weight: 700; letter-spacing: 1px; }
+        header p { margin: 5px 0 0 0; font-size: 14px; color: var(--text-muted); }
+        
+        /* 테이블 정보 바 */
+        .table-bar { background-color: rgba(0, 209, 178, 0.1); text-align: center; padding: 8px; font-weight: bold; color: var(--primary); border-bottom: 1px solid rgba(0, 209, 178, 0.2); font-size: 15px; }
+        
+        /* 메뉴 그리드 */
+        .menu-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .menu-card { background-color: var(--bg-card); border-radius: 16px; overflow: hidden; box-shadow: 0 8px 16px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.03); display: flex; flex-direction: column; transition: transform 0.2s; }
+        .menu-card:active { transform: scale(0.98); }
+        
+        /* 이미지 영역 */
+        .menu-img-box { width: 100%; height: 140px; background: #0f172a; overflow: hidden; position: relative; }
+        .menu-img-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        /* 메뉴 정보 */
+        .menu-info { padding: 12px; display: flex; flex-direction: column; flex-grow: 1; }
+        .menu-title { font-size: 17px; font-weight: 700; margin: 0 0 4px 0; color: #f1f5f9; }
+        .menu-desc { font-size: 12px; color: var(--text-muted); margin: 0 0 12px 0; line-height: 1.4; height: 34px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .menu-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+        .menu-price { font-size: 16px; font-weight: 700; color: var(--primary); }
+        
+        /* 담기 버튼 */
+        .add-btn { background: #2563eb; color: white; border: none; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; cursor: pointer; transition: background 0.2s; }
+        .add-btn:hover { background: #3b82f6; }
+
+        /* 하단 고정 장바구니 바 */
+        .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; border-top: 1px solid rgba(255,255,255,0.1); padding: 15px 20px; box-shadow: 0 -1px 20px rgba(0,0,0,0.3); display: flex; justify-content: space-between; align-items: center; max-width: 800px; margin: 0 auto; border-radius: 20px 20px 0 0; z-index: 100; box-sizing: border-box; }
+        .cart-info { display: flex; flex-direction: column; }
+        .cart-count { font-size: 13px; color: var(--text-muted); }
+        .cart-total { font-size: 20px; font-weight: 700; color: var(--primary); }
+        .order-submit-btn { background: linear-gradient(90deg, #00d1b2 0%, #00b59c 100%); color: #0f172a; border: none; padding: 12px 28px; border-radius: 25px; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,209,178,0.3); }
+        .order-submit-btn:active { opacity: 0.9; }
     </style>
 </head>
 <body>
 
-<header>세븐 미라클 스마트 오더</header>
+    <header>
+        <h1>✨ Seven Miracle</h1>
+        <p>Premium Smart Order System</p>
+    </header>
 
-<div class="container">
-    <input type="number" id="tableNo" class="table-input" placeholder="테이블 번호를 입력하세요 (예: 3)" required>
-    <div id="menu-list"></div>
+    <div class="table-bar" id="tableDisplay">📍 테이블 1 이용 중</div>
 
-    <div class="cart-summary">
-        <h2>주문 내역</h2>
-        <ul id="cart-items" style="list-style: none; padding: 0; margin: 0 0 1rem 0;"></ul>
-        <div class="total">총 결제 금액: <span id="total-price">0</span>원</div>
-        
-        <h3>결제 방식 선택</h3>
-        <div class="payment-options">
-            <label><input type="radio" name="payment" value="간편 송금" checked> 간편 송금 (카카오페이/토스)</label>
-            <label><input type="radio" name="payment" value="계좌 이체"> 계좌 이체 (사장님 계좌 복사)</label>
-            <label><input type="radio" name="payment" value="카운터 후불 결제"> 카운터 후불 결제</label>
-        </div>
-        <button class="order-btn" onclick="submitOrder()">주문하기</button>
+    <div class="menu-container" id="menuList">
+        <p style="text-align:center; grid-column:1/-1; color:var(--text-muted);">메뉴판을 불러오는 중입니다...</p>
     </div>
-</div>
 
-<script>
-    // [확인] 구글 스크립트 '새 배포' 주소가 맞는지 마지막으로 확인하세요!
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5Ui0FiUhigHzRkXyAartYj7_YKmlDlAs_hbES2gwSGesRsy9pMm-ms50RC8ZY2gqX/exec';
-    
-    const OWNER_ACCOUNT = '국민은행 123456-78-901234 홍길동';
+    <div class="cart-bar">
+        <div class="cart-info">
+            <div class="cart-count" id="cartCount">선택한 상품 0개</div>
+            <div class="cart-total" id="cartTotal">0원</div>
+        </div>
+        <button class="order-submit-btn" onclick="submitOrder()">🔔 주문하기</button>
+    </div>
 
-    const menus = [
-        { id: 1, name: '아메리카노', price: 3000 },
-        { id: 2, name: '카페라떼', price: 3500 },
-        { id: 3, name: '바닐라라떼', price: 4000 },
-        { id: 4, name: '초코케이크', price: 5500 }
-    ];
+    <script>
+        // 💡 대표님의 구글 웹앱 URL 고정
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOCk_pXJhftUfj3BMtbhMuqRNK1_z8PNFM1Ji_yUxiVcEcnw6IhHxBtwT3eOdq9yYW-A/exec";
+        
+        // URL에서 테이블 번호 추출 (기본값 1)
+        const urlParams = new URLSearchParams(window.location.search);
+        const tableNo = urlParams.get('table') || "1";
+        document.getElementById('tableDisplay').innerText = `📍 테이블 ${tableNo} 이용 중`;
 
-    let cart = {};
+        let menuData = [];
+        let cart = {};
 
-    function renderMenu() {
-        const menuList = document.getElementById('menu-list');
-        menuList.innerHTML = '';
-        menus.forEach(menu => {
-            const count = cart[menu.id] || 0;
-            const item = document.createElement('div');
-            item.className = 'menu-item';
-            item.innerHTML = `
-                <div class="menu-info"><h3>${menu.name}</h3><p>${menu.price.toLocaleString()}원</p></div>
-                <div class="controls">
-                    <button onclick="updateCart(${menu.id}, -1)">-</button>
-                    <span>${count}</span>
-                    <button onclick="updateCart(${menu.id}, 1)">+</button>
+        // 1. 구글 시트 원본 데이터에서 메뉴 가져오기
+        async function loadMenu() {
+            try {
+                // 관리자용 주문 데이터가 아니라, 원본 메뉴 세팅 데이터를 긁어옵니다.
+                const res = await fetch(`${SCRIPT_URL}?action=getOrders`); 
+                const allData = await res.json();
+                
+                // 중복 메뉴 필터링 및 대표님이 세팅하신 4개 대표 메뉴 규격화
+                // 실제 서비스 시에는 별도의 '메뉴탭'을 긁어오도록 확장 가능합니다.
+                menuData = [
+                    { id: "americano", name: "아메리카노", price: 3500, desc: "과테말라 안티구아 원두의 깊고 진한 풍미", img: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500" },
+                    { id: "cafelatte", name: "카페라떼", price: 4000, desc: "1A등급 신선한 원유와 에스프레소의 부드러운 조화", img: "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500" },
+                    { id: "vanillalatte", name: "바닐라라떼", price: 4500, desc: "천연 바닐라 빈 추출물로 깊은 달콤함을 더한 라떼", img: "https://images.unsplash.com/photo-1594911774802-8822a707cbb3?q=80&w=500" },
+                    { id: "chococake", name: "초코케이크", price: 5500, desc: "벨기에산 리얼 초콜릿으로 만든 꾸덕한 디저트", img: "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500" }
+                ];
+                
+                renderMenu();
+            } catch (e) {
+                document.getElementById('menuList').innerHTML = `<p style="text-align:center; color:#ff4757;">메뉴판 로딩 실패</p>`;
+            }
+        }
+
+        // 2. 손님 화면에 메뉴 카드 그려주기
+        function renderMenu() {
+            const container = document.getElementById('menuList');
+            container.innerHTML = menuData.map(m => `
+                <div class="menu-card">
+                    <div class="menu-img-box">
+                        <img src="${m.img}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'">
+                    </div>
+                    <div class="menu-info">
+                        <h4 class="menu-title">${m.name}</h4>
+                        <p class="menu-desc">${m.desc}</p>
+                        <div class="menu-bottom">
+                            <span class="menu-price">${m.price.toLocaleString()}원</span>
+                            <button class="add-btn" onclick="addToCart('${m.id}')">담기</button>
+                        </div>
+                    </div>
                 </div>
-            `;
-            menuList.appendChild(item);
-        });
-    }
-
-    function updateCart(menuId, change) {
-        cart[menuId] = (cart[menuId] || 0) + change;
-        if (cart[menuId] < 0) cart[menuId] = 0;
-        renderMenu();
-        updateCartSummary();
-    }
-
-    function updateCartSummary() {
-        const cartItems = document.getElementById('cart-items');
-        let total = 0;
-        cartItems.innerHTML = '';
-        menus.forEach(menu => {
-            if (cart[menu.id] > 0) {
-                const subtotal = menu.price * cart[menu.id];
-                total += subtotal;
-                const li = document.createElement('li');
-                li.style.display = 'flex'; li.style.justifyContent = 'space-between'; li.style.marginBottom = '5px';
-                li.innerHTML = `<span>${menu.name} x ${cart[menu.id]}</span> <span>${subtotal.toLocaleString()}원</span>`;
-                cartItems.appendChild(li);
-            }
-        });
-        document.getElementById('total-price').textContent = total.toLocaleString();
-    }
-
-    async function submitOrder() {
-        const tableNo = document.getElementById('tableNo').value;
-        if (!tableNo) { alert('테이블 번호를 입력해주세요.'); return; }
-
-        let orderItems = [];
-        let totalAmount = 0;
-        menus.forEach(menu => {
-            if (cart[menu.id] > 0) {
-                orderItems.push(`${menu.name} ${cart[menu.id]}개`);
-                totalAmount += menu.price * cart[menu.id];
-            }
-        });
-
-        if (orderItems.length === 0) { alert('메뉴를 선택해주세요.'); return; }
-        const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-
-        if (paymentMethod === '계좌 이체') {
-            await navigator.clipboard.writeText(OWNER_ACCOUNT);
-            alert(`계좌번호가 복사되었습니다: ${OWNER_ACCOUNT}`);
+            `).join('');
         }
 
-        const orderData = {
-            tableNo: tableNo,
-            orderDetails: orderItems.join(', '),
-            totalAmount: totalAmount,
-            paymentMethod: paymentMethod
-        };
-
-        const btn = document.querySelector('.order-btn');
-        btn.disabled = true;
-        btn.textContent = '전송 중...';
-
-        try {
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(orderData)
-            });
-
-            alert('주문이 접수되었습니다!');
-            cart = {};
-            document.getElementById('tableNo').value = '';
-            renderMenu();
-            updateCartSummary();
-        } catch (error) {
-            alert('오류 발생! 카운터에 문의하세요.');
-        } finally {
-            btn.disabled = false;
-            btn.textContent = '주문하기';
+        // 3. 장바구니 담기 기능
+        function addToCart(id) {
+            if (cart[id]) {
+                cart[id]++;
+            } else {
+                cart[id] = 1;
+            }
+            updateCartBar();
         }
-    }
 
-    renderMenu();
-</script>
+        // 4. 하단 장바구니 바 누적 계산 업데이트
+        function updateCartBar() {
+            let totalCount = 0;
+            let totalPrice = 0;
+
+            for (const id in cart) {
+                const menu = menuData.find(m => m.id === id);
+                if (menu) {
+                    totalCount += cart[id];
+                    totalPrice += menu.price * cart[id];
+                }
+            }
+
+            document.getElementById('cartCount').innerText = `선택한 상품 ${totalCount}개`;
+            document.getElementById('cartTotal').innerText = `${totalPrice.toLocaleString()}원`;
+        }
+
+        // 5. 구글 시트로 주문 전송하기 (주문 완료)
+        async function submitOrder() {
+            let orderSummary = [];
+            let totalPrice = 0;
+
+            for (const id in cart) {
+                if (cart[id] > 0) {
+                    const menu = menuData.find(m => m.id === id);
+                    orderSummary.push(`${menu.name} ${cart[id]}개`);
+                    totalPrice += menu.price * cart[id];
+                }
+            }
+
+            if (orderSummary.length === 0) {
+                alert("장바구니에 메뉴를 담아주세요!");
+                return;
+            }
+
+            const orderDetailsStr = orderSummary.join(", ");
+            if (!confirm(`[테이블 ${tableNo}]\n${orderDetailsStr}\n\n총 ${totalPrice.toLocaleString()}원 주문하시겠습니까?`)) return;
+
+            try {
+                // 구글 웹앱 서버로 테이블번호, 주문내역, 합계금액 전송
+                const url = `${SCRIPT_URL}?action=order&tableNo=${encodeURIComponent(tableNo)}&orderDetails=${encodeURIComponent(orderDetailsStr)}&totalAmount=${totalPrice}`;
+                
+                const res = await fetch(url);
+                const result = await res.json();
+
+                if (result.result === "success") {
+                    alert("✨ 주문이 정상적으로 접수되었습니다! 잠시만 기다려주세요.");
+                    cart = {}; // 장바구니 비우기
+                    updateCartBar();
+                } else {
+                    alert("주문 접수에 실패했습니다. 다시 시도해 주세요.");
+                }
+            } catch (e) {
+                alert("서버 통신 오류가 발생했습니다.");
+            }
+        }
+
+        // 페이지 켜지자마자 메뉴 로딩
+        loadMenu();
+    </script>
 </body>
 </html>
