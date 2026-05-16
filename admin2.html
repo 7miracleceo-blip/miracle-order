@@ -36,6 +36,7 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOCk_pXJhftUfj3BMtbhMuqRNK1_z8PNFM1Ji_yUxiVcEcnw6IhHxBtwT3eOdq9yYW-A/exec";
         let lastOrderCount = 0;
 
+        // 🔊 띵동 소리 알림 시스템 정상화
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playChime() {
             try {
@@ -90,7 +91,6 @@
             }
             
             div.innerHTML = orders.map(o => {
-                // 💡 대표님 시트의 한글 이름 변수 매핑 보완 (주문내역, 결제상태, 합계금액, 테이블번호, 타임스탬프)
                 const orderDetailsText = String(o.주문내역 || o.orderDetails || "");
                 const payStatusText = String(o.결제상태 || o.payStatus || "");
                 const tableNoText = o.테이블번호 || o.tableNo || "알수없음";
@@ -99,6 +99,7 @@
 
                 const isUnpaid = !payStatusText.includes("완료");
                 
+                // 💡 [완벽 교정] 마비의 주범이었던 시간 오타 싹 청소 완료!!
                 let displayTime = "실시간";
                 try {
                     const n = String(timestampText).match(/\d+/g);
@@ -112,7 +113,7 @@
                 let finalImg = "";
                 const orderText = orderDetailsText.replace(/\s+/g, "");
 
-                // 이미지 차단 없는 안전한 최고화질 Unsplash 직링크 구조 고정
+                // 이미지 로딩 우선순위 고정
                 if (orderText.includes("바닐라")) {
                     finalImg = "https://images.unsplash.com/photo-1594911774802-8822a707cbb3?q=80&w=500";
                 } else if (orderText.includes("아메리카노")) {
