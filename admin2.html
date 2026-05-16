@@ -15,7 +15,7 @@
         .order-card.unpaid { border: 2px solid #ff4757; background-color: #1e1b24; }
         .time-badge { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); color: #ffdd57; padding: 4px 8px; border-radius: 5px; font-size: 13px; font-weight: bold; }
         h3 { margin: 0; font-size: 26px; color: #00d1b2; font-weight: 700; }
-        .details { margin: 5px 0; font-size: 20px; font-weight: bold; color: #f1f5f9; line-height: 1.4; }
+        .details { margin: 5px 0; font-size: 22px; font-weight: bold; color: #f1f5f9; line-height: 1.4; }
         .pay-method { font-size: 14px; color: #94a3b8; margin: 0; }
         .amount { font-size: 24px; font-weight: bold; color: #ffdd57; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
         button { width: 100%; padding: 14px; background: #ff4757; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: background 0.2s; }
@@ -25,22 +25,20 @@
 </head>
 <body>
 
-    <h1>✨ Seven Miracle Premium POS (실시간 카운터 전용)</h1>
+    <h1>✨ Seven Miracle Premium POS (실시간 주방·카운터)</h1>
     <div id="orders">
         <p style="text-align:center; grid-column: 1/-1; color:#94a3b8;">주문 데이터를 동기화 중입니다...</p>
     </div>
 
     <script>
-        // 대표님의 새 배포 주소 연동 완료!
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxQaDqxSA1JaAKgNb4Wo97uOrP6QoZBn9YFnEjwGXxWpaImX2Crx4CrX1RCgb0oi57YQ/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOCk_pXJhftUfj3BMtbhMuqRNK1_z8PNFM1Ji_yUxiVcEcnw6IhHxBtwT3eOdq9yYW-A/exec";
         let lastOrderCount = 0;
 
-        // 🔊 카운터 원격 띵동 알림용 시스템
+        // 🔊 띵동 실시간 포스 소리 시스템 탑재
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playChime() {
             try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
+                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); 
                 osc.frequency.setValueAtTime(880.00, audioCtx.currentTime + 0.12); 
@@ -55,13 +53,11 @@
             try {
                 const res = await fetch(`${SCRIPT_URL}?action=getOrders`);
                 const data = await res.json();
-                
                 if (lastOrderCount > 0 && data.length > lastOrderCount) { playChime(); }
                 lastOrderCount = data.length;
-                
                 render(data);
             } catch (e) {
-                document.getElementById('orders').innerHTML = `<p style="text-align:center; grid-column:1/-1; color:#ff4757;">구글 웹앱 서버 연결 실패</p>`;
+                document.getElementById('orders').innerHTML = `<p style="text-align:center; grid-column:1/-1; color:#ff4757;">서버 데이터 동기화 대기 중...</p>`;
             }
         }
 
@@ -82,12 +78,12 @@
             }
             
             div.innerHTML = orders.map(o => {
-                const orderDetailsText = String(o.주문내역 || "");
-                const payStatusText = String(o.결제상태 || "");
-                const tableNoText = o.테이블번호 || "1";
-                const totalAmountText = o.합계금액 || 0;
-                const timestampText = o.타임스탬프 || "";
-                const payMethodText = o.결제방식 || "신용카드";
+                const orderDetailsText = String(o.주문내역 || o.orderDetails || "");
+                const payStatusText = String(o.결제상태 || o.결재상태 || o.payStatus || "대기중");
+                const tableNoText = o.테이블번호 || o.tableNo || "1";
+                const totalAmountText = o.합계금액 || o.totalAmount || 0;
+                const timestampText = o.타임스탬프 || o.timestamp || "";
+                const payMethodText = o.결제방식 || "미지정";
 
                 const isUnpaid = !payStatusText.includes("완료");
                 
@@ -120,10 +116,7 @@
             }).join('');
         }
 
-        window.addEventListener('click', () => {
-            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
-        });
-
+        window.addEventListener('click', () => { if (audioCtx.state === 'suspended') { audioCtx.resume(); } });
         checkOrders();
         setInterval(checkOrders, 5000);
     </script>
