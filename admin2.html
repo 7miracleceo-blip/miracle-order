@@ -81,22 +81,23 @@
                 let imagesHtml = "";
                 const orderText = String(o.orderDetails).replace(/\s+/g, "");
 
-                // 💡 [순서 대교정] 1순위로 '바닐라' 글자부터 검사해서 먼저 낚아챕니다!
-                if (orderText.includes("바닐라")) {
-                    imagesHtml += `<img src="https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?q=80&w=500" onerror="this.style.display='none'">`;
-                }
-                
-                // 2순위: 바닐라가 없는 순수한 '아메리카노' 검사
+                // 💡 [독립 매칭 격리 패치] 충돌 원인을 원천 차단했습니다.
+                // 1. 아메리카노 검사
                 if (orderText.includes("아메리카노")) {
                     imagesHtml += `<img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500" onerror="this.style.display='none'">`;
                 }
                 
-                // 3순위: 바닐라 글자가 섞이지 않은 '순수한 카페라떼'만 골라내기
+                // 2. 바닐라 검사 (바닐라가 포함되어 있으면 무조건 바닐라 사진만 추가)
+                if (orderText.includes("바닐라")) {
+                    imagesHtml += `<img src="https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?q=80&w=500" onerror="this.style.display='none'">`;
+                }
+                
+                // 3. 일반 카페라떼 검사 (★중요★ '바닐라'라는 단어가 단 한 글자도 없으면서 '라떼'나 '카페라떼'라는 말이 있을 때만 작동!)
                 if (!orderText.includes("바닐라") && (orderText.includes("카페라떼") || orderText.includes("라떼"))) {
                     imagesHtml += `<img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500" onerror="this.style.display='none'">`;
                 }
                 
-                // 4순위: 초코케익 검사
+                // 4. 초코케익 검사
                 if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
                     imagesHtml += `<img src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500" onerror="this.style.display='none'">`;
                 }
