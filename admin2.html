@@ -103,9 +103,10 @@
                 let finalImg = "";
                 const orderText = String(o.orderDetails);
 
-                // 💡 [무적 파편 낚시 로직] 앞뒤에 숫자 1이나 공백이 떡칠되어 있어도 '바닐라' 글자만 발견하면 무조건 1순위 강제 가로채기!
+                // 💡 [초안정 이미지 링크 개편] 국내 보안 필터에 절대 안 걸리는 무적 서버 주소로 교체!
                 if (orderText.indexOf("바닐라") !== -1) {
-                    finalImg = "https://images.unsplash.com/photo-1595434066389-02307b02c5f1?q=80&w=500";
+                    // 고화질 바닐라 라떼 아트 전용 무적 주소
+                    finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
                 } 
                 else if (orderText.indexOf("아메리카노") !== -1) {
                     finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
@@ -118,7 +119,7 @@
                 }
 
                 if (!finalImg || finalImg === "") {
-                    finalImg = "https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle";
+                    finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
                 }
 
                 return `
@@ -126,7 +127,7 @@
                         <div class="time-badge">${displayTime}</div>
                         
                         <div class="img-container">
-                            <img src="${finalImg}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'">
+                            <img src="${finalImg}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500'">
                         </div>
                         
                         <h3>테이블 ${o.tableNo}</h3>
