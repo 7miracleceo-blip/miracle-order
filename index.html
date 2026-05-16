@@ -81,10 +81,8 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOCk_pXJhftUfj3BMtbhMuqRNK1_z8PNFM1Ji_yUxiVcEcnw6IhHxBtwT3eOdq9yYW-A/exec";
-        let cart = {};
-        let tableNo = "1";
+        let cart = {}; let tableNo = "1";
 
-        // 테이블 번호 주소창에서 자동으로 받아오기 로직
         try {
             const urlParams = new URLSearchParams(window.location.search);
             if(urlParams.get('table')) {
@@ -101,34 +99,23 @@
 
         function updateCartBar() {
             let count = 0; let total = 0;
-            for(let key in cart) {
-                count += cart[key].count;
-                total += (cart[key].price * cart[key].count);
-            }
+            for(let key in cart) { count += cart[key].count; total += (cart[key].price * cart[key].count); }
             document.getElementById('cartCount').innerText = count;
             document.getElementById('cartTotal').innerText = total.toLocaleString();
         }
 
         async function submitOrder() {
             let details = []; let total = 0;
-            for(let key in cart) {
-                details.push(`${key} ${cart[key].count}개`);
-                total += (cart[key].price * cart[key].count);
-            }
+            for(let key in cart) { details.push(`${key} ${cart[key].count}개`); total += (cart[key].price * cart[key].count); }
             if(details.length === 0) { alert("상품을 담아주세요."); return; }
-
             const orderStr = details.join(", ");
-            if(!confirm(`[테이블 ${tableNo}] ${orderStr} 총 ${total.toLocaleString()}원 주문하시겠습니까?`)) return;
+            if(!confirm(`[테이블 ${tableNo}] ${orderStr} 주문하시겠습니까?`)) return;
 
             try {
-                // 구글 시트에 주문 전송
                 const res = await fetch(`${SCRIPT_URL}?action=addOrder&tableNo=${tableNo}&orderDetails=${encodeURIComponent(orderStr)}&totalAmount=${total}`);
                 alert("주문이 성공적으로 접수되었습니다!");
-                cart = {};
-                updateCartBar();
-            } catch(e) {
-                alert("주문 전송에 실패했습니다. 카운터에 문의해 주세요.");
-            }
+                cart = {}; updateCartBar();
+            } catch(e) { alert("주문을 전송하지 못했습니다."); }
         }
     </script>
 </body>
