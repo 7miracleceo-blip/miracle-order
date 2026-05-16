@@ -103,10 +103,10 @@
                 let finalImg = "";
                 const orderText = String(o.orderDetails);
 
-                // 💡 [초안정 이미지 링크 개편] 국내 보안 필터에 절대 안 걸리는 무적 서버 주소로 교체!
+                // 💡 [진짜 해결 조치] 바닐라와 카페라떼 사진 주소를 완벽하게 각자 다른 이미지로 분리 고정!
                 if (orderText.indexOf("바닐라") !== -1) {
-                    // 고화질 바닐라 라떼 아트 전용 무적 주소
-                    finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
+                    // ☕ 진짜 고화질 바닐라라떼 전용 사진 주소 (카페라떼 주소와 완전히 다름)
+                    finalImg = "https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?q=80&w=500";
                 } 
                 else if (orderText.indexOf("아메리카노") !== -1) {
                     finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
@@ -115,6 +115,7 @@
                     finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
                 } 
                 else if (orderText.indexOf("카페라떼") !== -1 || orderText.indexOf("라떼") !== -1 || orderText.indexOf("라때") !== -1) {
+                    // ☕ 하트 아트가 그려진 순수 카페라떼 사진 주소
                     finalImg = "https://images.unsplash.com/photo-1534778101976-62847782c213?q=80&w=500";
                 }
 
