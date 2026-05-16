@@ -31,10 +31,11 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOCk_pXJhftUfj3BMtbhMuqRNK1_z8PNFM1Ji_yUxiVcEcnw6IhHxBtwT3eOdq9yYW-A/exec";
+        // 대표님의 새 배포 주소 연동 완료!
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxQaDqxSA1JaAKgNb4Wo97uOrP6QoZBn9YFnEjwGXxWpaImX2Crx4CrX1RCgb0oi57YQ/exec";
         let lastOrderCount = 0;
 
-        // 🔊 알림음 재생 시스템 보강
+        // 🔊 카운터 원격 띵동 알림용 시스템
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playChime() {
             try {
@@ -55,7 +56,6 @@
                 const res = await fetch(`${SCRIPT_URL}?action=getOrders`);
                 const data = await res.json();
                 
-                // 전송된 주문 카운트 증가 검사 및 알림음 재생
                 if (lastOrderCount > 0 && data.length > lastOrderCount) { playChime(); }
                 lastOrderCount = data.length;
                 
@@ -82,7 +82,6 @@
             }
             
             div.innerHTML = orders.map(o => {
-                // 💡 백엔드가 전송한 대표님 한글 컬럼 완벽 연동
                 const orderDetailsText = String(o.주문내역 || "");
                 const payStatusText = String(o.결제상태 || "");
                 const tableNoText = o.테이블번호 || "1";
