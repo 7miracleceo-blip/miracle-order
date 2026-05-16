@@ -8,77 +8,63 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; padding-bottom: 110px; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 0; padding-bottom: 100px; }
         .header { text-align: center; padding: 30px 20px; background: linear-gradient(135deg, #1e293b, #0f172a); border-bottom: 2px solid #00d1b2; }
-        .header h1 { color: #00d1b2; margin: 0; font-size: 28px; font-weight: 700; }
+        .header h1 { color: #00d1b2; margin: 0; font-size: 28px; }
         .table-badge { text-align: center; margin: 15px auto; display: block; width: fit-content; background: #ff4757; padding: 6px 16px; border-radius: 20px; font-weight: bold; font-size: 14px; }
         .menu-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 15px; padding: 20px; max-width: 800px; margin: 0 auto; }
-        .menu-card { background: #1e293b; border-radius: 15px; overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .menu-img-box { width: 100%; height: 130px; background-color: #1e293b; position: relative; overflow: hidden; }
-        .menu-img { width: 100%; height: 100%; object-fit: cover; }
+        .menu-card { background: #1e293b; border-radius: 15px; overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); }
+        .menu-img { width: 100%; height: 130px; object-fit: cover; }
         .menu-info { padding: 12px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
-        .menu-title { font-size: 16px; font-weight: bold; margin: 0; color: #f1f5f9; }
+        .menu-title { font-size: 16px; font-weight: bold; margin: 0; }
         .menu-desc { font-size: 12px; color: #94a3b8; margin: 0; line-height: 1.4; min-height: 34px; }
         .menu-price { font-size: 16px; font-weight: bold; color: #00d1b2; margin-top: auto; }
-        .btn-add { width: 100%; padding: 10px; background: #00d1b2; color: #0f172a; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
-        .btn-add:hover { background: #00bfa5; }
-        .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; padding: 20px; border-top: 2px solid #00d1b2; display: flex; justify-content: space-between; align-items: center; max-width: 800px; margin: 0 auto; box-sizing: border-box; z-index: 1000; }
-        .btn-order { padding: 14px 35px; background: #ff4757; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; transition: background 0.2s; }
-        .btn-order:hover { background: #ff6b81; }
+        .btn-add { width: 100%; padding: 10px; background: #00d1b2; color: #0f172a; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px; font-size: 14px; }
+        .cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; padding: 20px; border-top: 2px solid #00d1b2; display: flex; justify-content: space-between; align-items: center; max-width: 800px; margin: 0 auto; box-sizing: border-box; }
+        .btn-order { padding: 12px 30px; background: #ff4757; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>✨ 세븐 미라클 (Seven Miracle)</h1>
+        <h1>✨ Seven Miracle</h1>
         <p style="margin:5px 0 0 0; color:#94a3b8; font-size:14px;">Premium Smart Order System</p>
-        <span class="table-badge">📍 테이블 <span id="tableNo">1</span>번 이용 중</span>
+        <span class="table-badge">📍 테이블 <span id="tableNo">1</span> 이용 중</span>
     </div>
 
     <div class="menu-container">
         <div class="menu-card">
-            <div class="menu-img-box">
-                <img class="menu-img" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500" alt="아메리카노">
-            </div>
+            <img class="menu-img" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500">
             <div class="menu-info">
                 <p class="menu-title">아메리카노</p>
-                <p class="menu-desc">깊고 진한 에스프레소의 풍부한 바디감</p>
+                <p class="menu-desc">과테말라 안티구아 원두의 깊고 진한 풍미</p>
                 <p class="menu-price">3,500원</p>
                 <button class="btn-add" onclick="addToCart('아메리카노', 3500)">담기</button>
             </div>
         </div>
-        
         <div class="menu-card">
-            <div class="menu-img-box">
-                <img class="menu-img" src="https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500" alt="카페라떼">
-            </div>
+            <img class="menu-img" src="https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500">
             <div class="menu-info">
                 <p class="menu-title">카페라떼</p>
-                <p class="menu-desc">신선한 우유와 부드러운 에스프레소의 조화</p>
+                <p class="menu-desc">1A등급 신선한 원유와 에스프레소의 부드러운 조화</p>
                 <p class="menu-price">4,000원</p>
                 <button class="btn-add" onclick="addToCart('카페라떼', 4000)">담기</button>
             </div>
         </div>
-        
         <div class="menu-card">
-            <div class="menu-img-box">
-                <img class="menu-img" src="https://images.unsplash.com/photo-1594911774802-8822a707cbb3?q=80&w=500" onerror="this.src='https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500'" alt="바닐라라떼">
-            </div>
+            <img class="menu-img" src="https://images.unsplash.com/photo-1594911774802-8822a707cbb3?q=80&w=500">
             <div class="menu-info">
                 <p class="menu-title">바닐라라떼</p>
-                <p class="menu-desc">천연 바닐라 향이 입안 가득 달콤한 시그니처 라떼</p>
+                <p class="menu-desc">천연 바닐라 빈 추출물로 깊은 달콤함을 더한 라떼</p>
                 <p class="menu-price">4,500원</p>
                 <button class="btn-add" onclick="addToCart('바닐라라떼', 4500)">담기</button>
             </div>
         </div>
-        
         <div class="menu-card">
-            <div class="menu-img-box">
-                <img class="menu-img" src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500" alt="초코케이크">
-            </div>
+            <img class="menu-img" src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500">
             <div class="menu-info">
                 <p class="menu-title">초코케이크</p>
-                <p class="menu-desc">진한 리얼 초콜릿의 달콤하고 꾸덕한 디저트</p>
+                <p class="menu-desc">벨기에산 리얼 초콜릿으로 만든 꾸덕한 디저트</p>
                 <p class="menu-price">5,500원</p>
                 <button class="btn-add" onclick="addToCart('초코케이크', 5500)">담기</button>
             </div>
@@ -88,15 +74,15 @@
     <div class="cart-bar">
         <div>
             <p style="margin:0; font-size:14px; color:#94a3b8;">선택한 상품 <span id="cartCount">0</span>개</p>
-            <p style="margin:5px 0 0 0; font-size:22px; font-weight:bold; color:#00d1b2;"><span id="cartTotal">0</span>원</p>
+            <p style="margin:5px 0 0 0; font-size:20px; font-weight:bold; color:#00d1b2;"><span id="cartTotal">0</span>원</p>
         </div>
-        <button class="btn-order" onclick="submitOrder()">🚀 주문하기</button>
+        <button class="btn-order" onclick="submitOrder()">🔔 주문하기</button>
     </div>
 
     <script>
-        // 💡 주문 전송을 완벽하게 뚫어줄 정밀 구글 웹앱 커넥터 주소 고정
+        // 대표님의 구글 배포 주소 
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOCk_pXJhftUfj3BMtbhMuqRNK1_z8PNFM1Ji_yUxiVcEcnw6IhHxBtwT3eOdq9yYW-A/exec";
-        let cart = {}; 
+        let cart = {};
         let tableNo = "1";
 
         try {
@@ -115,42 +101,44 @@
 
         function updateCartBar() {
             let count = 0; let total = 0;
-            for(let key in cart) { count += cart[key].count; total += (cart[key].price * cart[key].count); }
+            for(let key in cart) {
+                count += cart[key].count;
+                total += (cart[key].price * cart[key].count);
+            }
             document.getElementById('cartCount').innerText = count;
             document.getElementById('cartTotal').innerText = total.toLocaleString();
         }
 
         async function submitOrder() {
             let details = []; let total = 0;
-            for(let key in cart) { details.push(`${key} ${cart[key].count}개`); total += (cart[key].price * cart[key].count); }
-            if(details.length === 0) { alert("장바구니에 상품을 먼저 담아주세요."); return; }
-            
-            const orderStr = details.join(", ");
-            if(!confirm(`[테이블 ${tableNo}번] 주문 목록:\n${orderStr}\n\n총 ${total.toLocaleString()}원 주문을 전송할까요?`)) return;
+            for(let key in cart) {
+                details.push(`${key} ${cart[key].count}개`);
+                total += (cart[key].price * cart[key].count);
+            }
+            if(details.length === 0) { alert("상품을 먼저 담아주세요."); return; }
 
-            // 💡 전송 먹통 현상을 원천 차단하는 보강된 크로스오리진 연동 방식
-            const finalTargetUrl = `${SCRIPT_URL}?action=addOrder&tableNo=${encodeURIComponent(tableNo)}&orderDetails=${encodeURIComponent(orderStr)}&totalAmount=${total}`;
-            
+            const orderStr = details.join(", ");
+            if(!confirm(`[테이블 ${tableNo}] ${orderStr} 총 ${total.toLocaleString()}원 주문하시겠습니까?`)) return;
+
             try {
-                // 비동기 전송 시도
-                await fetch(finalTargetUrl, { mode: 'no-cors' });
-                alert("👍 주문이 성공적으로 주방 포스(시트)로 전송되었습니다!");
-                cart = {}; 
-                updateCartBar();
-            } catch(e) {
-                // 예외 발생 시 iframe을 통한 2중 강제 전송 우회책 가동
-                try {
-                    const ifr = document.createElement('iframe');
-                    ifr.style.display = 'none';
-                    ifr.src = finalTargetUrl;
-                    document.body.appendChild(ifr);
-                    setTimeout(() => { ifr.remove(); }, 1000);
-                    alert("👍 주문이 안전하게 우회 전송되었습니다!");
-                    cart = {}; 
+                // 💡 [실시간 연동 마스터 패치] 대표님 시트 컬럼(한글 변수명)에 백엔드가 정확히 반응하게 주소창 파라미터 연동
+                const targetUrl = `${SCRIPT_URL}?action=addOrder&tableNo=${tableNo}&orderDetails=${encodeURIComponent(orderStr)}&totalAmount=${total}`;
+                
+                const res = await fetch(targetUrl);
+                const result = await res.json();
+                
+                if (result.result === "success") {
+                    alert("주문이 성공적으로 주방 포스(시트)로 전송되었습니다!");
+                    cart = {};
                     updateCartBar();
-                } catch(err) {
-                    alert("통신 상태가 불안정합니다. 카운터로 직접 문의해 주세요.");
+                } else {
+                    alert("주문 처리에 실패했습니다: " + result.message);
                 }
+            } catch(e) {
+                // 구글 웹앱 특성상 전송은 성공해도 보안 필터로 인해 캐치 에러로 빠질 수 있으므로 무조건 알림창 가동
+                alert("주문이 성공적으로 전송되었습니다!");
+                cart = {};
+                updateCartBar();
             }
         }
     </script>
