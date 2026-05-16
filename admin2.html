@@ -14,8 +14,8 @@
         .order-card { background-color: #1e293b; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); position: relative; display: flex; flex-direction: column; gap: 10px; }
         .order-card.unpaid { border: 2px solid #ff4757; background-color: #1e1b24; }
         .time-badge { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); color: #ffdd57; padding: 4px 8px; border-radius: 5px; font-size: 13px; font-weight: bold; z-index: 10; }
-        .img-container { width: 100%; height: 180px; border-radius: 10px; overflow: hidden; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); }
-        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .img-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; width: 100%; min-height: 120px; border-radius: 10px; overflow: hidden; background: #0f172a; padding: 5px; border: 1px solid rgba(255,255,255,0.1); box-sizing: border-box; }
+        .img-grid img { width: 100%; height: 120px; object-fit: cover; border-radius: 6px; }
         h3 { margin: 5px 0 0 0; font-size: 24px; color: #f1f5f9; }
         .details { margin: 0; font-size: 18px; font-weight: bold; color: #cbd5e1; }
         .desc { margin: 5px 0; font-size: 14px; color: #94a3b8; font-style: italic; line-height: 1.4; }
@@ -33,10 +33,8 @@
     </div>
 
     <script>
-        // 대표님의 새 배포 주소
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOCk_pXJhftUfj3BMtbhMuqRNK1_z8PNFM1Ji_yUxiVcEcnw6IhHxBtwT3eOdq9yYW-A/exec";
 
-        // 실시간 주문 체크 (5초마다)
         async function checkOrders() {
             try {
                 const res = await fetch(`${SCRIPT_URL}?action=getOrders`);
@@ -47,7 +45,6 @@
             }
         }
 
-        // 결제 완료 처리 함수
         async function markAsPaid(row) {
             if (!confirm("결제 완료 처리하시겠습니까?")) return;
             try {
@@ -61,7 +58,6 @@
             }
         }
 
-        // 화면에 주문 목록 그려주는 함수
         function render(orders) {
             const div = document.getElementById('orders');
             if (!orders || orders.length === 0) {
@@ -72,7 +68,6 @@
             div.innerHTML = orders.map(o => {
                 const isUnpaid = !String(o.payStatus).includes("완료");
                 
-                // 한국 시간 보정 계산 로직
                 let displayTime = "실시간";
                 try {
                     const n = String(o.timestamp).match(/\d+/g);
@@ -83,28 +78,33 @@
                     }
                 } catch (e) {}
 
-                // 💡 바닐라라떼 오타 및 공백 무적 방어벽 코드 추가
-                let finalImg = o.이미지 ? String(o.이미지).trim() : "";
-                if (String(o.orderDetails).includes("바닐라") || finalImg === "" || finalImg.length < 10) {
-                    if (String(o.orderDetails).includes("바닐라")) {
-                        finalImg = "https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?q=80&w=500";
-                    } else if (String(o.orderDetails).includes("아메리카노")) {
-                        finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
-                    } else if (String(o.orderDetails).includes("카페라떼") || String(o.orderDetails).includes("카푸치노")) {
-                        finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
-                    } else if (String(o.orderDetails).includes("케익") || String(o.orderDetails).includes("케이크")) {
-                        finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
-                    } else {
-                        finalImg = "https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle";
-                    }
+                let imagesHtml = "";
+                const orderText = String(o.orderDetails);
+
+                // 💡 [초정밀 단어 독립 매칭] 여러 개 섞여 있어도 무조건 각각 뽑아내는 로직
+                if (orderText.includes("아메리카노")) {
+                    imagesHtml += `<img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500" onerror="this.style.display='none'">`;
+                }
+                if (orderText.includes("바닐라")) {
+                    imagesHtml += `<img src="https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?q=80&w=500" onerror="this.style.display='none'">`;
+                }
+                if (orderText.includes("카페라떼") || (orderText.includes("라떼") && !orderText.includes("바닐라"))) {
+                    imagesHtml += `<img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500" onerror="this.style.display='none'">`;
+                }
+                if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
+                    imagesHtml += `<img src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500" onerror="this.style.display='none'">`;
+                }
+
+                if (imagesHtml === "") {
+                    imagesHtml = `<img src="https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle">`;
                 }
 
                 return `
                     <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
                         <div class="time-badge">${displayTime}</div>
                         
-                        <div class="img-container">
-                            <img src="${finalImg}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'">
+                        <div class="img-grid">
+                            ${imagesHtml}
                         </div>
                         
                         <h3>테이블 ${o.tableNo}</h3>
