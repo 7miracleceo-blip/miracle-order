@@ -79,18 +79,24 @@
                 } catch (e) {}
 
                 let imagesHtml = "";
-                const orderText = String(o.orderDetails);
+                const orderText = String(o.orderDetails).replace(/\s+/g, "");
 
-                // 💡 [초정밀 단어 독립 매칭] 여러 개 섞여 있어도 무조건 각각 뽑아내는 로직
-                if (orderText.includes("아메리카노")) {
-                    imagesHtml += `<img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500" onerror="this.style.display='none'">`;
-                }
+                // 💡 [순서 대교정] 1순위로 '바닐라' 글자부터 검사해서 먼저 낚아챕니다!
                 if (orderText.includes("바닐라")) {
                     imagesHtml += `<img src="https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?q=80&w=500" onerror="this.style.display='none'">`;
                 }
-                if (orderText.includes("카페라떼") || (orderText.includes("라떼") && !orderText.includes("바닐라"))) {
+                
+                // 2순위: 바닐라가 없는 순수한 '아메리카노' 검사
+                if (orderText.includes("아메리카노")) {
+                    imagesHtml += `<img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500" onerror="this.style.display='none'">`;
+                }
+                
+                // 3순위: 바닐라 글자가 섞이지 않은 '순수한 카페라떼'만 골라내기
+                if (!orderText.includes("바닐라") && (orderText.includes("카페라떼") || orderText.includes("라떼"))) {
                     imagesHtml += `<img src="https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500" onerror="this.style.display='none'">`;
                 }
+                
+                // 4순위: 초코케익 검사
                 if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
                     imagesHtml += `<img src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500" onerror="this.style.display='none'">`;
                 }
