@@ -111,15 +111,15 @@
                 let finalImg = "";
                 const orderText = orderDetailsText.replace(/\s+/g, "");
 
-                // 💡 [순서 대교정 패치] '바닐라'를 무조건 카페라떼보다 먼저 걸러내게 구조 변경!
+                // 💡 [초직관적 이미지 전면 교체] 바닐라라떼는 무조건 '아이스 바닐라 라떼 유리잔' 사진으로 강제 꽂음!
                 if (orderText.includes("바닐라")) {
-                    finalImg = "https://images.unsplash.com/photo-1594911774802-8822a707cbb3?q=80&w=500"; // 바닐라라떼 사진
+                    finalImg = "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?q=80&w=500"; 
                 } else if (orderText.includes("아메리카노")) {
                     finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
                 } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
                     finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
                 } else if (orderText.includes("카페라떼") || orderText.includes("라떼")) {
-                    finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500"; // 카페라떼 사진
+                    finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500"; 
                 } else {
                     finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
                 }
