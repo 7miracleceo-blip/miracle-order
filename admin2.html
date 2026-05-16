@@ -98,6 +98,7 @@
                 const totalAmountText = o["합계금액"] || o["totalAmount"] || o[rawKeys[3]] || 0;
                 const timestampText = o["타임스탬프"] || o["timestamp"] || o[rawKeys[0]] || "";
                 const descText = o["설명"] || o["desc"] || o[rawKeys[7]] || "세븐 미라클의 정성을 담은 메뉴입니다.";
+                const sheetImgUrl = o["이미지"] || o["image"] || o[rawKeys[6]] || "";
                 const rowNum = o.row || 2;
 
                 const isUnpaid = !payStatusText.includes("완료");
@@ -108,24 +109,28 @@
                     if (n && n.length >= 5) {
                         let dt = new Date(n[0], n[1]-1, n[2], n[3], n[4]);
                         dt.setHours(dt.getHours() + 9);
-                        displayTime = `${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${n[4]}`;
+                        displayTime = `${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')} : ${n[4]}`;
                     }
                 } catch (e) {}
 
                 let finalImg = "";
                 const orderText = orderDetailsText.replace(/\s+/g, "");
 
-                // 💡 [최종 조치] 절대 차단되지 않는 구글 공식 위키 서버의 바닐라라떼 이미지로 전격 교체!
-                if (orderText.includes("바") || orderText.includes("닐") || orderText.includes("바닐라")) {
-                    finalImg = "https://w.namu.la/f/4df0a9967664687d60ff3eb9e54a32ecbe8c217e9bb4f94086e09c855325b1b4";
-                } else if (orderText.includes("아메") || orderText.includes("리카노")) {
-                    finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
-                } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코") || orderText.includes("코크")) {
-                    finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
-                } else if (orderText.includes("카페") || orderText.includes("라떼") || orderText.includes("떼")) {
-                    finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
+                // 💡 [초간결 팩트 로직 고정]
+                // 대표님이 시트지 G열에 고쳐 넣으신 그 무적 주소를 1순위로 다이렉트 로딩합니다!
+                if (sheetImgUrl && sheetImgUrl.trim() !== "" && sheetImgUrl.length > 15) {
+                    finalImg = sheetImgUrl.trim();
                 } else {
-                    finalImg = "https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle";
+                    // 혹시라도 시트지가 비어있을 때를 대비한 2차 백업 방어벽
+                    if (orderText.includes("바닐라") || orderText.includes("바") || orderText.includes("닐")) {
+                        finalImg = "https://cdn.pixabay.com/photo/2017/08/07/22/57/coffee-2608864_1280.jpg";
+                    } else if (orderText.includes("아메") || orderText.includes("리카노")) {
+                        finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
+                    } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
+                        finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
+                    } else {
+                        finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
+                    }
                 }
 
                 return `
@@ -133,7 +138,7 @@
                         <div class="time-badge">${displayTime}</div>
                         
                         <div class="img-container">
-                            <img src="${finalImg}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Vanilla+Latte'">
+                            <img src="${finalImg}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'">
                         </div>
                         
                         <h3>테이블 ${tableNoText}</h3>
