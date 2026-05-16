@@ -2,122 +2,133 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>세븐 미라클 POS - 날짜정밀모드</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seven Miracle Premium POS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #121212; color: white; font-family: 'Pretendard', sans-serif; margin: 0; padding: 20px; }
-        header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 2px solid #333; margin-bottom: 20px; }
-        #live-clock { font-size: 32px; font-weight: bold; color: #00d1b2; }
-        #orders { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-        .order-card { background: #252525; border-radius: 15px; padding: 20px; border-top: 10px solid #00d1b2; position: relative; }
-        .order-card.unpaid { border-top: 10px solid #ff4757; background: #2d1f1f; }
-        /* 날짜/시간 배지: 더 잘 보이게 크기 키움 */
-        .time-badge { position: absolute; top: 15px; right: 20px; font-size: 16px; font-weight: bold; color: #ffdd57; background: rgba(0,0,0,0.5); padding: 4px 10px; border-radius: 5px; border: 1px solid #ffdd57; }
-        .price { font-size: 26px; font-weight: bold; color: #00d1b2; margin-top: 15px; }
-        #setup { text-align: center; margin-top: 150px; }
-        #start-btn { padding: 30px 60px; font-size: 24px; background: #00d1b2; color: white; border: none; border-radius: 15px; cursor: pointer; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
+        h1 { text-align: center; color: #00d1b2; font-size: 32px; margin-bottom: 30px; font-weight: 700; }
+        #orders { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; max-width: 1400px; margin: 0 auto; }
+        .order-card { background-color: #1e293b; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); position: relative; display: flex; flex-direction: column; gap: 10px; }
+        .order-card.unpaid { border: 2px solid #ff4757; background-color: #1e1b24; }
+        .time-badge { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.6); color: #ffdd57; padding: 4px 8px; border-radius: 5px; font-size: 13px; font-weight: bold; z-index: 10; }
+        .img-container { width: 100%; height: 180px; border-radius: 10px; overflow: hidden; background: #0f172a; border: 1px solid rgba(255,255,255,0.1); }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        h3 { margin: 5px 0 0 0; font-size: 24px; color: #f1f5f9; }
+        .details { margin: 0; font-size: 18px; font-weight: bold; color: #cbd5e1; }
+        .desc { margin: 5px 0; font-size: 14px; color: #94a3b8; font-style: italic; line-height: 1.4; }
+        .amount { font-size: 22px; font-weight: bold; color: #00d1b2; margin-top: 5px; }
+        button { width: 100%; padding: 12px; background: #ff4757; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: background 0.2s; }
+        button:hover { background: #ff6b81; }
+        .paid-badge { text-align: center; color: #00d1b2; font-weight: bold; padding: 10px; border: 1px solid #00d1b2; border-radius: 8px; font-size: 16px; }
     </style>
 </head>
 <body>
 
-    <div id="setup">
-        <h1 style="color:#00d1b2;">SEVEN MIRACLE</h1>
-        <p>날짜와 시간이 포함된 최신 버전을 로드합니다.</p><br>
-        <button id="start-btn" onclick="activateSystem()">시스템 시작</button>
+    <h1>✨ Seven Miracle Premium POS</h1>
+    <div id="orders">
+        <p style="text-align:center; grid-column: 1/-1; color:#94a3b8;">주문 데이터를 불러오는 중입니다...</p>
     </div>
 
-    <div id="main-ui" style="display:none;">
-        <header>
-            <h1>주문 현황판</h1>
-            <div id="live-clock">00:00:00</div>
-        </header>
-        <div id="orders"></div>
-    </div>
+    <script>
+        // 대표님의 구글 웹앱 URL 주소 (v52 완성본 연동)
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_9eYf3Xw27qOofS0_7DcoVfOfP7gD_4Z5f80-G_6mR4PZ3zZ_gJz_gJz_gJz_gJz_/exec";
 
-<script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5Ui0FiUhigHzRkXyAartYj7_YKmlDlAs_hbES2gwSGesRsy9pMm-ms50RC8ZY2gqX/exec';
-    let lastCount = 0;
-    let audioCtx = null;
-
-    function activateSystem() {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        document.getElementById('setup').style.display = 'none';
-        document.getElementById('main-ui').style.display = 'block';
-        setInterval(() => {
-            document.getElementById('live-clock').textContent = new Date().toLocaleTimeString('ko-KR', { hour12: false });
-        }, 1000);
-        checkOrders();
-        setInterval(checkOrders, 5000);
-    }
-
-    function playTone(f, d) {
-        if(!audioCtx) return;
-        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-        o.connect(g); g.connect(audioCtx.destination);
-        o.frequency.value = f; g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-        o.start(); o.stop(audioCtx.currentTime + d);
-    }
-
-    async function checkOrders() {
-        try {
-            const res = await fetch(SCRIPT_URL + '?t=' + new Date().getTime());
-            const data = await res.json();
-            const activeOrders = data.filter(o => String(o.status).includes("대기중"));
-            if (activeOrders.length > lastCount) {
-                const latest = activeOrders[activeOrders.length - 1];
-                if (String(latest.payStatus).includes("완료")) {
-                    playTone(659, 0.5); setTimeout(() => playTone(523, 0.5), 200);
-                } else {
-                    playTone(392, 0.3); setTimeout(() => playTone(392, 0.3), 300);
-                }
+        // 실시간 주문 체크 (5초마다)
+        async function checkOrders() {
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=getOrders`);
+                const data = await res.json();
+                render(data);
+            } catch (e) {
+                console.error("데이터 동기화 실패", e);
             }
-            lastCount = activeOrders.length;
-            render(activeOrders);
-        } catch (e) { console.log("Error"); }
-    }
-
-function render(orders) {
-    const div = document.getElementById('orders');
-    div.innerHTML = orders.map(o => {
-        const isUnpaid = !String(o.payStatus).includes("완료");
-        
-        let displayDateTime = "";
-        try {
-            const raw = String(o.timestamp); // "2026-05-14T19:50..."
-            const n = raw.match(/\d+/g); 
-            
-            if (n && n.length >= 5) {
-                // 1. 서버 날짜를 기준으로 객체 생성 (14일 19시 등)
-                let dt = new Date(n[0], n[1]-1, n[2], n[3], n[4], n[5] || 0);
-                
-                // 2. ★ 핵심: 서버 시간(UTC)에 딱 9시간만 더합니다.
-                // 14일 19시에 9시간을 더하면 자동으로 15일 04시가 됩니다.
-                // 14일 10시에 들어온 주문이라면 14일 19시로 남습니다.
-                dt.setHours(dt.getHours() + 9);
-                
-                const mm = String(dt.getMonth() + 1).padStart(2, '0');
-                const dd = String(dt.getDate()).padStart(2, '0');
-                const hh = String(dt.getHours()).padStart(2, '0');
-                const min = String(dt.getMinutes()).padStart(2, '0');
-                
-                displayDateTime = `${mm}/${dd} ${hh}:${min}`;
-            }
-        } catch (e) {
-            displayDateTime = "시간 확인불가"; 
         }
 
-        return `
-            <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
-                <div class="time-badge">${displayDateTime}</div>
-                <h3 style="margin:0;">테이블 ${o.tableNo}</h3>
-                <p style="margin:20px 0; font-size:18px;">${o.orderDetails}</p>
-                <div class="price">${o.totalAmount.toLocaleString()}원</div>
-                <div style="font-weight:bold; color:${isUnpaid ? '#ff4757' : '#00d1b2'}">
-                    ${isUnpaid ? '⚠️ 현장결제' : '✅ 결제완료'}
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-</script>
+        // 결제 완료 처리 함수
+        async function markAsPaid(row) {
+            if (!confirm("결제 완료 처리하시겠습니까?")) return;
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=pay&row=${row}`);
+                const result = await res.json();
+                if (result.result === "success") {
+                    checkOrders();
+                }
+            } catch (e) {
+                alert("통신 오류가 발생했습니다.");
+            }
+        }
+
+        // 구글 드라이브 주소 무적 변환기
+        function getImageUrl(url) {
+            if (!url || url === "" || url.trim() === "") {
+                return "https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle";
+            }
+            let fileId = "";
+            try {
+                if (url.includes("/d/")) {
+                    fileId = url.split('/d/')[1].split('/')[0];
+                } else if (url.includes("id=")) {
+                    fileId = url.split('id=')[1].split('&')[0];
+                }
+                if (fileId) {
+                    return `https://drive.google.com/uc?export=view&id=${fileId}`;
+                }
+            } catch (e) {}
+            return url;
+        }
+
+        // 화면에 주문 목록 그려주는 함수
+        function render(orders) {
+            const div = document.getElementById('orders');
+            if (!orders || orders.length === 0) {
+                div.innerHTML = '<p style="text-align:center; grid-column:1/-1; color:#94a3b8;">현재 접수된 주문이 없습니다.</p>';
+                return;
+            }
+            
+            div.innerHTML = orders.map(o => {
+                const isUnpaid = !String(o.payStatus).includes("완료");
+                
+                // 한국 시간 보정 계산 로직
+                let displayTime = "확인중";
+                try {
+                    const n = String(o.timestamp).match(/\d+/g);
+                    if (n && n.length >= 5) {
+                        let dt = new Date(n[0], n[1]-1, n[2], n[3], n[4]);
+                        dt.setHours(dt.getHours() + 9);
+                        displayTime = `${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${n[4]}`;
+                    }
+                } catch (e) {}
+
+                return `
+                    <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
+                        <div class="time-badge">${displayTime}</div>
+                        
+                        <div class="img-container">
+                            <img src="${getImageUrl(o.이미지)}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'">
+                        </div>
+                        
+                        <h3>테이블 ${o.tableNo}</h3>
+                        <p class="details">${o.orderDetails}</p>
+                        <p class="desc">${o.설명 || "세븐 미라클의 정성을 담은 메뉴입니다."}</p>
+                        <div class="amount">${Number(o.totalAmount).toLocaleString()}원</div>
+                        
+                        <div style="margin-top:auto; padding-top:10px;">
+                            ${isUnpaid 
+                                ? `<button onclick="markAsPaid(${o.row})">💳 결제 완료 처리</button>` 
+                                : `<div class="paid-badge">✅ 결제 완료</div>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 페이지 켜지자마자 실행 후 5초마다 새로고침
+        checkOrders();
+        setInterval(checkOrders, 5000);
+    </script>
 </body>
 </html>
