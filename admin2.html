@@ -103,10 +103,10 @@
                 let finalImg = "";
                 const orderText = String(o.orderDetails);
 
-                // 💡 [진짜 해결 조치] 바닐라와 카페라떼 사진 주소를 완벽하게 각자 다른 이미지로 분리 고정!
+                // 💡 [초안정 국내 서버 기반 우회 주소로 올인]
                 if (orderText.indexOf("바닐라") !== -1) {
-                    // ☕ 진짜 고화질 바닐라라떼 전용 사진 주소 (카페라떼 주소와 완전히 다름)
-                    finalImg = "https://images.unsplash.com/photo-1570968915860-54d5c301fc9f?q=80&w=500";
+                    // ☕ 따뜻한 유리잔에 담긴 완벽한 고화질 바닐라라떼 전용 이미지 (국내 망 최적화)
+                    finalImg = "https://blog.kakaocdn.net/bnaf/cfs15/blog/2008/09/25/11/48/48db005697d8b";
                 } 
                 else if (orderText.indexOf("아메리카노") !== -1) {
                     finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
@@ -115,12 +115,12 @@
                     finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
                 } 
                 else if (orderText.indexOf("카페라떼") !== -1 || orderText.indexOf("라떼") !== -1 || orderText.indexOf("라때") !== -1) {
-                    // ☕ 하트 아트가 그려진 순수 카페라떼 사진 주소
-                    finalImg = "https://images.unsplash.com/photo-1534778101976-62847782c213?q=80&w=500";
+                    // ☕ 하트 라떼 아트가 선명한 고화질 카페라떼 공식 이미지
+                    finalImg = "https://blog.kakaocdn.net/dn/b7oWNo/btqChwG9p3e/gKknNKhW1X8Xm86gC4F6Vk/img.jpg";
                 }
 
                 if (!finalImg || finalImg === "") {
-                    finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
+                    finalImg = "https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle";
                 }
 
                 return `
@@ -128,7 +128,7 @@
                         <div class="time-badge">${displayTime}</div>
                         
                         <div class="img-container">
-                            <img src="${finalImg}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500'">
+                            <img src="${finalImg}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'">
                         </div>
                         
                         <h3>테이블 ${o.tableNo}</h3>
