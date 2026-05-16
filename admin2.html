@@ -34,7 +34,7 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOCk_pXJhftUfj3BMtbhMuqRNK1_z8PNFM1Ji_yUxiVcEcnw6IhHxBtwT3eOdq9yYW-A/exec";
         let lastOrderCount = 0;
 
-        // 🔊 무적의 띵동 소리 알림 시스템
+        // 🔊 알림음 재생 시스템 보강
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playChime() {
             try {
@@ -55,7 +55,7 @@
                 const res = await fetch(`${SCRIPT_URL}?action=getOrders`);
                 const data = await res.json();
                 
-                // 새로운 주문 건수가 늘어나면 주저 없이 소리 내기
+                // 전송된 주문 카운트 증가 검사 및 알림음 재생
                 if (lastOrderCount > 0 && data.length > lastOrderCount) { playChime(); }
                 lastOrderCount = data.length;
                 
@@ -82,12 +82,13 @@
             }
             
             div.innerHTML = orders.map(o => {
-                const orderDetailsText = String(o.주문내역 || o.orderDetails || "");
-                const payStatusText = String(o.결제상태 || o.결재상태 || o.payStatus || "");
-                const tableNoText = o.테이블번호 || o.tableNo || "1";
-                const totalAmountText = o.합계금액 || o.totalAmount || 0;
-                const timestampText = o.타임스탬프 || o.timestamp || "";
-                const payMethodText = o.결제방식 || "카운터";
+                // 💡 백엔드가 전송한 대표님 한글 컬럼 완벽 연동
+                const orderDetailsText = String(o.주문내역 || "");
+                const payStatusText = String(o.결제상태 || "");
+                const tableNoText = o.테이블번호 || "1";
+                const totalAmountText = o.합계금액 || 0;
+                const timestampText = o.타임스탬프 || "";
+                const payMethodText = o.결제방식 || "신용카드";
 
                 const isUnpaid = !payStatusText.includes("완료");
                 
@@ -120,7 +121,6 @@
             }).join('');
         }
 
-        // 브라우저 소리 활성화용 클릭 이벤트
         window.addEventListener('click', () => {
             if (audioCtx.state === 'suspended') { audioCtx.resume(); }
         });
