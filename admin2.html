@@ -6,7 +6,7 @@
     <title>Seven Miracle Premium POS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght=400;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Noto Sans KR', sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
         h1 { text-align: center; color: #00d1b2; font-size: 32px; margin-bottom: 30px; font-weight: 700; }
@@ -21,55 +21,72 @@
         .desc { margin: 5px 0; font-size: 14px; color: #94a3b8; font-style: italic; line-height: 1.4; }
         .amount { font-size: 22px; font-weight: bold; color: #00d1b2; margin-top: 5px; }
         button { width: 100%; padding: 12px; background: #ff4757; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: background 0.2s; }
+        button:hover { background: #ff6b81; }
+        .paid-badge { text-align: center; color: #00d1b2; font-weight: bold; padding: 10px; border: 1px solid #00d1b2; border-radius: 8px; font-size: 16px; }
     </style>
 </head>
 <body>
 
-    <h1>✨ Seven Miracle Premium POS (직통 모드)</h1>
+    <h1>✨ Seven Miracle Premium POS</h1>
     <div id="orders">
-        <p style="text-align:center; grid-column: 1/-1; color:#94a3b8;">구글 시트에서 직접 데이터를 긁어오는 중...</p>
+        <p style="text-align:center; grid-column: 1/-1; color:#94a3b8;">새로운 배포 주소로 연결을 시도하는 중입니다...</p>
     </div>
 
     <script>
-        // 구글 시트에서 다이렉트로 데이터를 추출하는 직통 주소
-        const SHEET_JSON_URL = "https://docs.google.com/spreadsheets/d/1KeHsnkS6fksAJm3aJ1U1Fx_lAdsUwb4lY21jFtzg2YE/gviz/tq?tqx=out:json";
+        // 대표님이 방금 주신 따끈따끈한 새 배포 주소 연동 완료!
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOCk_pXJhftUfj3BMtbhMuqRNK1_z8PNFM1Ji_yUxiVcEcnw6IhHxBtwT3eOdq9yYW-A/exec";
 
-        async function loadDirectData() {
+        // 실시간 주문 체크 (5초마다)
+        async function checkOrders() {
             try {
-                const res = await fetch(SHEET_JSON_URL);
-                const text = await res.text();
-                // 구글이 주는 특수 JSON 형태 정제하기
-                const jsonData = JSON.parse(text.substring(47, text.length - 2));
-                const rows = jsonData.table.rows;
-                
-                const orders = rows.map((r, index) => {
-                    return {
-                        row: index + 2,
-                        timestamp: r.c[0] ? r.c[0].v : "",    // A열: 시간
-                        tableNo: r.c[1] ? r.c[1].v : "미정",   // B열: 테이블번호
-                        orderDetails: r.c[2] ? r.c[2].v : "",  // C열: 주문내역
-                        totalAmount: r.c[3] ? r.c[3].v : 0,   // D열: 총금액
-                        payMethod: r.c[4] ? r.c[4].v : "",     // E열: 결재방식
-                        payStatus: r.c[5] ? r.c[5].v : "",     // F열: 처리상태
-                        이미지: r.c[6] ? r.c[6].v : "",        // G열: 이미지
-                        설명: r.c[7] ? r.c[7].v : ""           // H열: 설명
-                    };
-                });
-                
-                render(orders);
+                const res = await fetch(`${SCRIPT_URL}?action=getOrders`);
+                const data = await res.json();
+                render(data);
             } catch (e) {
-                document.getElementById('orders').innerHTML = `<p style="text-align:center; grid-column:1/-1; color:#ff4757;">시트 직통 연결 실패: ${e.message}</p>`;
+                document.getElementById('orders').innerHTML = `<p style="text-align:center; grid-column:1/-1; color:#ff4757;">구글 웹앱 연결 실패 (서버 상태 확인 필요)</p>`;
+                console.error(e);
             }
         }
 
+        // 결제 완료 처리 함수
+        async function markAsPaid(row) {
+            if (!confirm("결제 완료 처리하시겠습니까?")) return;
+            try {
+                const res = await fetch(`${SCRIPT_URL}?action=pay&row=${row}`);
+                const result = await res.json();
+                if (result.result === "success") {
+                    checkOrders();
+                }
+            } catch (e) {
+                alert("통신 오류가 발생했습니다.");
+            }
+        }
+
+        // 화면에 주문 목록 그려주는 함수
         function render(orders) {
             const div = document.getElementById('orders');
+            if (!orders || orders.length === 0) {
+                div.innerHTML = '<p style="text-align:center; grid-column:1/-1; color:#94a3b8;">현재 접수된 주문이 없습니다.</p>';
+                return;
+            }
+            
             div.innerHTML = orders.map(o => {
                 const isUnpaid = !String(o.payStatus).includes("완료");
                 
+                // 한국 시간 보정 계산 로직
+                let displayTime = "실시간";
+                try {
+                    const n = String(o.timestamp).match(/\d+/g);
+                    if (n && n.length >= 5) {
+                        let dt = new Date(n[0], n[1]-1, n[2], n[3], n[4]);
+                        dt.setHours(dt.getHours() + 9);
+                        displayTime = `${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${n[4]}`;
+                    }
+                } catch (e) {}
+
                 return `
                     <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
-                        <div class="time-badge">실시간</div>
+                        <div class="time-badge">${displayTime}</div>
                         
                         <div class="img-container">
                             <img src="${o.이미지 || 'https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'">
@@ -81,16 +98,19 @@
                         <div class="amount">${Number(o.totalAmount).toLocaleString()}원</div>
                         
                         <div style="margin-top:auto; padding-top:10px;">
-                            <div style="text-align:center; color:#00d1b2; font-weight:bold; padding:10px; border:1px solid #00d1b2; border-radius:8px;">📡 원격 연결 완료</div>
+                            ${isUnpaid 
+                                ? `<button onclick="markAsPaid(${o.row})">💳 결제 완료 처리</button>` 
+                                : `<div class="paid-badge">✅ 결제 완료</div>`
+                            }
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        // 즉시 실행 및 5초 주기 새로고침
-        loadDirectData();
-        setInterval(loadDirectData, 5000);
+        // 시작하자마자 체크 후 5초 간격 갱신
+        checkOrders();
+        setInterval(checkOrders, 5000);
     </script>
 </body>
 </html>
