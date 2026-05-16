@@ -48,4 +48,95 @@
                 <p class="menu-title">카페라떼</p>
                 <p class="menu-desc">1A등급 신선한 원유와 에스프레소의 부드러운 조화</p>
                 <p class="menu-price">4,000원</p>
-                <button class="btn-add" onclick="addToCart
+                <button class="btn-add" onclick="addToCart('카페라떼', 4000)">담기</button>
+            </div>
+        </div>
+        <div class="menu-card">
+            <img class="menu-img" src="https://images.unsplash.com/photo-1594911774802-8822a707cbb3?auto=format&fit=crop&w=500&q=80">
+            <div class="menu-info">
+                <p class="menu-title">바닐라라떼</p>
+                <p class="menu-desc">천연 바닐라 빈 추출물로 깊은 달콤함을 더한 라떼</p>
+                <p class="menu-price">4,500원</p>
+                <button class="btn-add" onclick="addToCart('바닐라라떼', 4500)">담기</button>
+            </div>
+        </div>
+        <div class="menu-card">
+            <img class="menu-img" src="https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=500&q=80">
+            <div class="menu-info">
+                <p class="menu-title">초코케이크</p>
+                <p class="menu-desc">벨기에산 리얼 초콜릿으로 만든 꾸덕한 디저트</p>
+                <p class="menu-price">5,500원</p>
+                <button class="btn-add" onclick="addToCart('초코케이크', 5500)">담기</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="cart-bar">
+        <div>
+            <p style="margin:0; font-size:14px; color:#94a3b8;">선택한 상품 <span id="cartCount">0</span>개</p>
+            <p style="margin:5px 0 0 0; font-size:20px; font-weight:bold; color:#00d1b2;"><span id="cartTotal">0</span>원</p>
+        </div>
+        <button class="btn-order" onclick="submitOrder()">🔔 주문하기</button>
+    </div>
+
+    <script>
+        // 💡 대표님이 방금 주신 최신 무적 배포 주소 연동 완료!
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvf3Mu-p8lkNgt1a3k9XVO8-HWZ8jIc6s_bA3Wa0Gyr8ENmud6D9iDuCj0QQB6g5iNVw/exec";
+        let cart = {};
+        let tableNo = "1";
+
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            if(urlParams.get('table')) {
+                tableNo = urlParams.get('table');
+                document.getElementById('tableNo').innerText = tableNo;
+            }
+        } catch(e){}
+
+        function addToCart(name, price) {
+            if(cart[name]) { cart[name].count++; } 
+            else { cart[name] = { price: price, count: 1 }; }
+            updateCartBar();
+        }
+
+        function updateCartBar() {
+            let count = 0; let total = 0;
+            for(let key in cart) {
+                count += cart[key].count;
+                total += (cart[key].price * cart[key].count);
+            }
+            document.getElementById('cartCount').innerText = count;
+            document.getElementById('cartTotal').innerText = total.toLocaleString();
+        }
+
+        // 💡 브라우저 방화벽 차단을 해제하는 특수 JSONP 전송 로직
+        function submitOrder() {
+            let details = []; let total = 0;
+            for(let key in cart) {
+                details.push(`${key} ${cart[key].count}개`);
+                total += (cart[key].price * cart[key].count);
+            }
+            if(details.length === 0) { alert("상품을 먼저 담아주세요."); return; }
+
+            const orderStr = details.join(", ");
+            if(!confirm(`[테이블 ${tableNo}] ${orderStr} 총 ${total.toLocaleString()}원 주문하시겠습니까?`)) return;
+
+            // 브라우저가 막지 못하게 동적으로 스크립트 태그를 꽂아서 구글 서버로 직접 쏘아 보냅니다.
+            const script = document.createElement('script');
+            script.src = `${SCRIPT_URL}?action=addOrder&tableNo=${tableNo}&orderDetails=${encodeURIComponent(orderStr)}&totalAmount=${total}&callback=onOrderResponse`;
+            document.body.appendChild(script);
+        }
+
+        // 구글 서버로부터 가로막힘 없이 안전하게 신호를 받았을 때 가동되는 완료 팝업
+        function onOrderResponse(response) {
+            if (response.result === "success") {
+                alert("주문이 성공적으로 세븐 미라클 포스로 전송되었습니다!");
+                cart = {};
+                updateCartBar();
+            } else {
+                alert("전송 실패: " + response.message);
+            }
+        }
+    </script>
+</body>
+</html>
