@@ -34,11 +34,37 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxOCk_pXJhftUfj3BMtbhMuqRNK1_z8PNFM1Ji_yUxiVcEcnw6IhHxBtwT3eOdq9yYW-A/exec";
+        let lastOrderCount = 0;
+
+        // 🔊 띵동 소리 알림 기능 탑재
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playChime() {
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // 레
+                osc.frequency.setValueAtTime(880.00, audioCtx.currentTime + 0.15); // 라
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.6);
+            } catch (e) { console.log("오디오 재생 제한", e); }
+        }
 
         async function checkOrders() {
             try {
                 const res = await fetch(`${SCRIPT_URL}?action=getOrders`);
                 const data = await res.json();
+                
+                // 새로운 주문 들어오면 소리 나게 설정
+                if (lastOrderCount > 0 && data.length > lastOrderCount) {
+                    playChime();
+                }
+                lastOrderCount = data.length;
+                
                 render(data);
             } catch (e) {
                 document.getElementById('orders').innerHTML = `<p style="text-align:center; grid-column:1/-1; color:#ff4757;">구글 웹앱 연결 실패</p>`;
@@ -68,6 +94,7 @@
             div.innerHTML = orders.map(o => {
                 const isUnpaid = !String(o.payStatus).includes("완료");
                 
+                // 💡 오타 완벽 교정한 한국 시간 변환 로직
                 let displayTime = "실시간";
                 try {
                     const n = String(o.timestamp).match(/\d+/g);
@@ -81,7 +108,7 @@
                 let finalImg = "";
                 const orderText = String(o.orderDetails).replace(/\s+/g, "");
 
-                // 💡 [원천 차단 패치] 보안 필터에 안 걸리는 구글 공인 서버 이미지로 전면 교체!
+                // 💡 [초안정 이미지 매칭 구조 고정]
                 if (orderText.includes("바닐라")) {
                     finalImg = "https://images.unsplash.com/photo-1594911774802-8822a707cbb3?q=80&w=500";
                 } else if (orderText.includes("아메리카노")) {
@@ -99,7 +126,7 @@
                         <div class="time-badge">${displayTime}</div>
                         
                         <div class="img-container">
-                            <img src="${finalImg}" painting-strategy="bypass" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle-Error'">
+                            <img src="${finalImg}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle-Error'">
                         </div>
                         
                         <h3>테이블 ${o.tableNo}</h3>
@@ -117,6 +144,11 @@
                 `;
             }).join('');
         }
+
+        // 브라우저 소리 재생 권한 확보용 터치 이벤트 추가
+        window.addEventListener('click', () => {
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+        });
 
         checkOrders();
         setInterval(checkOrders, 5000);
