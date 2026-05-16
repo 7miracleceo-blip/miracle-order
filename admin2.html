@@ -101,23 +101,24 @@
                 } catch (e) {}
 
                 let finalImg = "";
-                const orderText = String(o.orderDetails).replace(/\s+/g, "");
+                const orderText = String(o.orderDetails);
 
-                // 💡 [초안정 이미지 링크 전면 배치] 방화벽 정책에 절대 걸리지 않는 주소로 교체
-                if (orderText.includes("바닐라")) {
-                    // 따뜻하고 예쁜 바닐라 라떼 아트 공식 고화질 사진 링크
-                    finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
-                } else if (orderText.includes("아메리카노")) {
+                // 💡 [무적 파편 낚시 로직] 앞뒤에 숫자 1이나 공백이 떡칠되어 있어도 '바닐라' 글자만 발견하면 무조건 1순위 강제 가로채기!
+                if (orderText.indexOf("바닐라") !== -1) {
+                    finalImg = "https://images.unsplash.com/photo-1595434066389-02307b02c5f1?q=80&w=500";
+                } 
+                else if (orderText.indexOf("아메리카노") !== -1) {
                     finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
-                } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
+                } 
+                else if (orderText.indexOf("케익") !== -1 || orderText.indexOf("케이크") !== -1 || orderText.indexOf("초코") !== -1) {
                     finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
-                } else if (orderText.includes("카페라떼") || orderText.includes("라떼")) {
+                } 
+                else if (orderText.indexOf("카페라떼") !== -1 || orderText.indexOf("라떼") !== -1 || orderText.indexOf("라때") !== -1) {
                     finalImg = "https://images.unsplash.com/photo-1534778101976-62847782c213?q=80&w=500";
                 }
 
-                // 혹시 모를 에러 방지용 완벽한 2중 방어벽 자동 연동
                 if (!finalImg || finalImg === "") {
-                    finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
+                    finalImg = "https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle";
                 }
 
                 return `
@@ -125,7 +126,7 @@
                         <div class="time-badge">${displayTime}</div>
                         
                         <div class="img-container">
-                            <img src="${finalImg}" onerror="this.src='https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500'">
+                            <img src="${finalImg}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'">
                         </div>
                         
                         <h3>테이블 ${o.tableNo}</h3>
