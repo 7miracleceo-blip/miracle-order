@@ -90,4 +90,71 @@
             }
             
             div.innerHTML = orders.map(o => {
-                // 대표님 구글 시트 한글 열 이름 100% 매핑 보완 및 오타(결재상
+                // 💡 구글 서버 통신 규격(영어)과 데이터 매핑 일치화
+                const orderDetailsText = String(o.orderDetails || o.주문내역 || "");
+                const payStatusText = String(o.payStatus || o.결제상태 || o.결재상태 || "");
+                const tableNoText = o.tableNo || o.테이블번호 || "1";
+                const totalAmountText = o.totalAmount || o.합계금액 || 0;
+                const timestampText = o.timestamp || o.타임스탬프 || "";
+
+                const isUnpaid = !payStatusText.includes("완료");
+                
+                let displayTime = "실시간";
+                try {
+                    const n = String(timestampText).match(/\d+/g);
+                    if (n && n.length >= 5) {
+                        let dt = new Date(n[0], n[1]-1, n[2], n[3], n[4]);
+                        dt.setHours(dt.getHours() + 9);
+                        displayTime = `${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${n[4]}`;
+                    }
+                } catch (e) {}
+
+                let finalImg = "";
+                const orderText = orderDetailsText.replace(/\s+/g, "");
+
+                // 💡 이미지 필터 독립 검색 및 매칭 로직 탑재
+                if (orderText.includes("바닐라")) {
+                    finalImg = "https://images.unsplash.com/photo-1594911774802-8822a707cbb3?q=80&w=500";
+                } else if (orderText.includes("아메리카노")) {
+                    finalImg = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=500";
+                } else if (orderText.includes("케익") || orderText.includes("케이크") || orderText.includes("초코")) {
+                    finalImg = "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=500";
+                } else if (orderText.includes("카페라떼") || orderText.includes("라떼")) {
+                    finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
+                } else {
+                    finalImg = "https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500";
+                }
+
+                return `
+                    <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
+                        <div class="time-badge">${displayTime}</div>
+                        
+                        <div class="img-container">
+                            <img src="${finalImg}" onerror="this.src='https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=500'">
+                        </div>
+                        
+                        <h3>테이블 ${tableNoText}</h3>
+                        <p class="details">${orderDetailsText}</p>
+                        <p class="desc">${o.설명 || "세븐 미라클의 정성을 담은 메뉴입니다."}</p>
+                        <div class="amount">${Number(totalAmountText).toLocaleString()}원</div>
+                        
+                        <div style="margin-top:auto; padding-top:10px;">
+                            ${isUnpaid 
+                                ? `<button onclick="markAsPaid(${o.row})">💳 결제 완료 처리</button>` 
+                                : `<div class="paid-badge">✅ 결제 완료</div>`
+                            }
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.addEventListener('click', () => {
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+        });
+
+        checkOrders();
+        setInterval(checkOrders, 5000);
+    </script>
+</body>
+</html>
