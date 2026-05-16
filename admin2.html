@@ -21,93 +21,58 @@
         .desc { margin: 5px 0; font-size: 14px; color: #94a3b8; font-style: italic; line-height: 1.4; }
         .amount { font-size: 22px; font-weight: bold; color: #00d1b2; margin-top: 5px; }
         button { width: 100%; padding: 12px; background: #ff4757; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: background 0.2s; }
-        button:hover { background: #ff6b81; }
-        .paid-badge { text-align: center; color: #00d1b2; font-weight: bold; padding: 10px; border: 1px solid #00d1b2; border-radius: 8px; font-size: 16px; }
     </style>
 </head>
 <body>
 
-    <h1>✨ Seven Miracle Premium POS</h1>
+    <h1>✨ Seven Miracle Premium POS (직통 모드)</h1>
     <div id="orders">
-        <p style="text-align:center; grid-column: 1/-1; color:#94a3b8;">주문 데이터를 불러오는 중입니다...</p>
+        <p style="text-align:center; grid-column: 1/-1; color:#94a3b8;">구글 시트에서 직접 데이터를 긁어오는 중...</p>
     </div>
 
     <script>
-        // 대표님의 진짜 구글 웹앱 URL 주소
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzooYN47HsQO7PYjUSqSU17Qh7RrNHg3EB3CU7dJRRdR5IM7UTSUbxUCD3AqadRP7Q3qg/exec";
+        // 구글 시트에서 다이렉트로 데이터를 추출하는 직통 주소
+        const SHEET_JSON_URL = "https://docs.google.com/spreadsheets/d/1KeHsnkS6fksAJm3aJ1U1Fx_lAdsUwb4lY21jFtzg2YE/gviz/tq?tqx=out:json";
 
-        // 실시간 주문 체크 (5초마다)
-        async function checkOrders() {
+        async function loadDirectData() {
             try {
-                const res = await fetch(`${SCRIPT_URL}?action=getOrders`);
-                const data = await res.json();
-                render(data);
+                const res = await fetch(SHEET_JSON_URL);
+                const text = await res.text();
+                // 구글이 주는 특수 JSON 형태 정제하기
+                const jsonData = JSON.parse(text.substring(47, text.length - 2));
+                const rows = jsonData.table.rows;
+                
+                const orders = rows.map((r, index) => {
+                    return {
+                        row: index + 2,
+                        timestamp: r.c[0] ? r.c[0].v : "",    // A열: 시간
+                        tableNo: r.c[1] ? r.c[1].v : "미정",   // B열: 테이블번호
+                        orderDetails: r.c[2] ? r.c[2].v : "",  // C열: 주문내역
+                        totalAmount: r.c[3] ? r.c[3].v : 0,   // D열: 총금액
+                        payMethod: r.c[4] ? r.c[4].v : "",     // E열: 결재방식
+                        payStatus: r.c[5] ? r.c[5].v : "",     // F열: 처리상태
+                        이미지: r.c[6] ? r.c[6].v : "",        // G열: 이미지
+                        설명: r.c[7] ? r.c[7].v : ""           // H열: 설명
+                    };
+                });
+                
+                render(orders);
             } catch (e) {
-                console.error("데이터 동기화 실패", e);
+                document.getElementById('orders').innerHTML = `<p style="text-align:center; grid-column:1/-1; color:#ff4757;">시트 직통 연결 실패: ${e.message}</p>`;
             }
         }
 
-        // 결제 완료 처리 함수
-        async function markAsPaid(row) {
-            if (!confirm("결제 완료 처리하시겠습니까?")) return;
-            try {
-                const res = await fetch(`${SCRIPT_URL}?action=pay&row=${row}`);
-                const result = await res.json();
-                if (result.result === "success") {
-                    checkOrders();
-                }
-            } catch (e) {
-                alert("통신 오류가 발생했습니다.");
-            }
-        }
-
-        // 구글 드라이브 주소 무적 변환기
-        function getImageUrl(url) {
-            if (!url || url === "" || url.trim() === "") {
-                return "https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle";
-            }
-            let fileId = "";
-            try {
-                if (url.includes("/d/")) {
-                    fileId = url.split('/d/')[1].split('/')[0];
-                } else if (url.includes("id=")) {
-                    fileId = url.split('id=')[1].split('&')[0];
-                }
-                if (fileId) {
-                    return `https://drive.google.com/uc?export=view&id=${fileId}`;
-                }
-            } catch (e) {}
-            return url;
-        }
-
-        // 화면에 주문 목록 그려주는 함수
         function render(orders) {
             const div = document.getElementById('orders');
-            if (!orders || orders.length === 0) {
-                div.innerHTML = '<p style="text-align:center; grid-column:1/-1; color:#94a3b8;">현재 접수된 주문이 없습니다.</p>';
-                return;
-            }
-            
             div.innerHTML = orders.map(o => {
                 const isUnpaid = !String(o.payStatus).includes("완료");
                 
-                // 한국 시간 보정 계산 로직
-                let displayTime = "확인중";
-                try {
-                    const n = String(o.timestamp).match(/\d+/g);
-                    if (n && n.length >= 5) {
-                        let dt = new Date(n[0], n[1]-1, n[2], n[3], n[4]);
-                        dt.setHours(dt.getHours() + 9);
-                        displayTime = `${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${n[4]}`;
-                    }
-                } catch (e) {}
-
                 return `
                     <div class="order-card ${isUnpaid ? 'unpaid' : ''}">
-                        <div class="time-badge">${displayTime}</div>
+                        <div class="time-badge">실시간</div>
                         
                         <div class="img-container">
-                            <img src="${getImageUrl(o.이미지)}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'">
+                            <img src="${o.이미지 || 'https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'}" onerror="this.src='https://placehold.co/400x300/1e293b/00d1b2?text=Seven+Miracle'">
                         </div>
                         
                         <h3>테이블 ${o.tableNo}</h3>
@@ -116,19 +81,16 @@
                         <div class="amount">${Number(o.totalAmount).toLocaleString()}원</div>
                         
                         <div style="margin-top:auto; padding-top:10px;">
-                            ${isUnpaid 
-                                ? `<button onclick="markAsPaid(${o.row})">💳 결제 완료 처리</button>` 
-                                : `<div class="paid-badge">✅ 결제 완료</div>`
-                            }
+                            <div style="text-align:center; color:#00d1b2; font-weight:bold; padding:10px; border:1px solid #00d1b2; border-radius:8px;">📡 원격 연결 완료</div>
                         </div>
                     </div>
                 `;
             }).join('');
         }
 
-        // 페이지 켜지자마자 실행 후 5초마다 새로고침
-        checkOrders();
-        setInterval(checkOrders, 5000);
+        // 즉시 실행 및 5초 주기 새로고침
+        loadDirectData();
+        setInterval(loadDirectData, 5000);
     </script>
 </body>
 </html>
